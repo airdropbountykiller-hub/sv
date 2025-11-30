@@ -1,0 +1,14 @@
+{
+  "date": "2025-11-15",
+  "coherence_score": 0.0,
+  "daily_accuracy": 85.0,
+  "messages_sent": 21,
+  "pages_generated": 6,
+  "sentiment_evolution": "NEGATIVE",
+  "news_volume": 14,
+  "predictions_count": 3,
+  "sources": {
+    "journal": "H:\\il mio drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-11-15.json",
+    "predictions": "H:\\il mio drive\\sv\\reports\\1_daily\\predictions_2025-11-15.json"
+  }
+}

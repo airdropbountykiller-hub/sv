@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SV Calendar Intelligence - Full View</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            color: #e6e6e6;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+            border-bottom: 3px solid #4fd1c7;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            color: #4fd1c7;
+            font-size: 2rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(79, 209, 199, 0.4);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid #4a5568;
+            color: #a0aec0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-tab:hover {
+            border-color: #4fd1c7;
+            color: #4fd1c7;
+            background: rgba(79, 209, 199, 0.1);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #4fd1c7 0%, #38b2ac 100%);
+            color: #1a1f2e;
+            border-color: #4fd1c7;
+            font-weight: 600;
+        }
+        
+        .status-bar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(79, 209, 199, 0.1);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(79, 209, 199, 0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .page-title h2 {
+            font-size: 2.5rem;
+            color: #4fd1c7;
+            font-weight: 700;
+            text-shadow: 0 4px 16px rgba(79, 209, 199, 0.3);
+            margin-bottom: 1rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .full-width-section {
+            grid-column: 1 / -1;
+            margin-bottom: 3rem;
+        }
+        
+        .section {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            border-radius: 20px;
+            border: 2px solid #2d3748;
+            overflow: hidden;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4fd1c7, #38b2ac, #319795);
+        }
+        
+        .section:hover {
+            border-color: #4fd1c7;
+            box-shadow: 0 16px 64px rgba(79, 209, 199, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a2332 100%);
+            padding: 2rem 2.5rem;
+            border-bottom: 2px solid #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header h3 {
+            color: #4fd1c7;
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(79, 209, 199, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .section-badge {
+            background: rgba(79, 209, 199, 0.2);
+            color: #4fd1c7;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(79, 209, 199, 0.3);
+        }
+        
+        .section-content {
+            padding: 2.5rem;
+        }
+        
+        .market-status {
+            background: linear-gradient(135deg, #2d3748 0%, #1a2332 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #4a5568;
+        }
+        
+        .market-context {
+            background: linear-gradient(135deg, #2d3748 0%, #1a2332 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid #4a5568;
+        }
+        
+        .event-item {
+            background: linear-gradient(135deg, #2d3748 0%, #1a2332 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #4fd1c7;
+            transition: all 0.3s ease;
+        }
+        
+        .event-item:hover {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            transform: translateX(8px);
+            box-shadow: 0 4px 16px rgba(79, 209, 199, 0.2);
+        }
+        
+        .event-title {
+            font-weight: 600;
+            color: #e6e6e6;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .event-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #a0aec0;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #a0aec0;
+            padding: 3rem;
+            font-size: 1.1rem;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #c53030;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .nav-tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📆 SV Calendar Intelligence</h1>
+            
+            <nav class="nav-tabs">
+                <a href="/" class="nav-tab">🏠 Dashboard</a>
+                <a href="/calendario" class="nav-tab active">📆 Calendar</a>
+                <a href="/news" class="nav-tab">📰 News</a>
+                <a href="/ml" class="nav-tab">🤖 ML Analysis</a>
+            </nav>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <span>🕒</span>
+                    <span id="current-time">--:--:--</span>
+                </div>
+                <div class="status-item">
+                    <span>📈</span>
+                    <span id="market-status">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-title">
+            <h2>📊 Market & Calendar Intelligence</h2>
+            <p class="page-subtitle">
+                Real-time market status, economic events analysis and intelligent calendar insights
+            </p>
+        </div>
+
+        <!-- Market Status Section -->
+        <div class="content-grid">
+            <div class="section">
+                <div class="section-header">
+                    <h3>📊 Market Status</h3>
+                    <span class="section-badge" id="market-status-badge">--</span>
+                </div>
+                <div class="section-content">
+                    <div class="market-status" id="market-details">
+                        <div class="loading">Loading market status...</div>
+                    </div>
+                    <div class="market-context" id="day-context">
+                        <div class="loading">Loading day context...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h3>📅 Economic Events</h3>
+                    <span class="section-badge" id="events-count">--</span>
+                </div>
+                <div class="section-content">
+                    <div id="events-content">
+                        <div class="loading">Loading upcoming events...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Calendar Analysis -->
+        <div class="full-width-section">
+            <div class="section">
+                <div class="section-header">
+                    <h3>🎯 Advanced Calendar Analysis</h3>
+                    <span class="section-badge">Full Intelligence</span>
+                </div>
+                <div class="section-content">
+                    <div id="advanced-calendar">
+                        <div class="loading">Loading advanced calendar analysis...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US');
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        // Fetch calendar data
+        async function fetchCalendar() {
+            try {
+                const response = await fetch('/api/calendar');
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('events-content').innerHTML = 
+                        `<div class="error">Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                // Update status badge
+                document.getElementById('market-status-badge').textContent = data.market_status;
+                document.getElementById('market-status').textContent = data.market_status;
+                document.getElementById('events-count').textContent = `${data.events_count} events`;
+                
+                // Update market status
+                document.getElementById('market-details').innerHTML = `
+                    <h4>📊 Market Status</h4>
+                    <div><strong>${data.market_status}</strong></div>
+                    <div>${data.market_message}</div>
+                `;
+                
+                // Update day context
+                const context = data.day_context;
+                document.getElementById('day-context').innerHTML = `
+                    <h4>🎯 Day Context</h4>
+                    <div><strong>${context.desc}</strong></div>
+                    <div>Focus: ${context.focus} • Tone: ${context.tone}</div>
+                    <div>Priority: ${context.content_priority}</div>
+                `;
+                
+                // Update events
+                const eventsHtml = data.upcoming_events
+                    .map(event => `
+                        <div class="event-item">
+                            <div class="event-title">${event.Title}</div>
+                            <div class="event-meta">
+                                <span><strong>${event.Impact}</strong> Impact</span>
+                                <span>${event.Source || event.Category} • ${event.Date}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                
+                document.getElementById('events-content').innerHTML = eventsHtml || 
+                    '<div class="loading">No events in the coming days</div>';
+                
+                // Advanced calendar analysis
+                document.getElementById('advanced-calendar').innerHTML = `
+                    <div class="content-grid">
+                        <div class="market-status">
+                            <h4>📈 Market Intelligence</h4>
+                            <p><strong>Current Status:</strong> ${data.market_status}</p>
+                            <p><strong>Day Focus:</strong> ${context.focus}</p>
+                            <p><strong>Trading Priority:</strong> ${context.content_priority}</p>
+                        </div>
+                        <div class="market-status">
+                            <h4>🎯 Strategy Insights</h4>
+                            <p><strong>Market Tone:</strong> ${context.tone}</p>
+                            <p><strong>Content Priority:</strong> ${context.content_priority}</p>
+                            <p><strong>Week Position:</strong> Thursday - Pre Weekend</p>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Calendar fetch error:', error);
+                document.getElementById('events-content').innerHTML = 
+                    `<div class="error">Failed to load calendar: ${error.message}</div>`;
+            }
+        }
+        
+        // Initialize page
+        function init() {
+            updateTime();
+            fetchCalendar();
+            
+            setInterval(updateTime, 1000);
+            setInterval(fetchCalendar, 60000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

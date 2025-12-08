@@ -36,6 +36,7 @@
 #### 🩹 Se vedi conflitti di merge
 - Assicurati di avere l'ultimo stato remoto: `git fetch origin` (o il nome del tuo remote).
 - Allinea il branch: `git pull --rebase origin <branch>` e lascia che Git evidenzi i file in conflitto.
+- Per `DIARY.md` usiamo un merge driver `ours` (vedi `.gitattributes`), quindi in caso di conflitto mantieni la versione locale e marca il file come risolto con `git add DIARY.md`.
 - Apri i file con marker `<<<<<<<`, `=======`, `>>>>>>>` e mantieni solo la versione corretta (tipicamente quella che sposta script/tools dentro `temp_tests/` e i backup/debug in `config/`).
 - Una volta risolto, marca i file come risolti (`git add <file>...`), poi continua il rebase con `git rebase --continue` (o fai un commit se non stai rebasing).
 - Verifica con `git status` che non ci siano altri conflitti e rilancia i comandi di push/PR.

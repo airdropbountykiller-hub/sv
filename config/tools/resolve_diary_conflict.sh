@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Quick helper to resolve DIARY.md conflicts if Git didn't apply merge=union automatically.
-# Usage: bash temp_tests/tools/resolve_diary_conflict.sh
+# Usage: bash config/tools/resolve_diary_conflict.sh
 set -euo pipefail
 
 # If DIARY.md is conflicted, prefer the current branch version to unblock the merge.

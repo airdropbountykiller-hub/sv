@@ -66,7 +66,10 @@ def generate_evening_analysis(ctx) -> List[str]:
                     continuity = get_narrative_continuity()
                     noon_connection = continuity.get_evening_noon_connection()
                     
-                    msg1_parts.append(f"{EMOJI['bullet']} {noon_connection.get('noon_followup', f'{EMOJI['chart_up']} From noon: Progress tracking - objectives summary')}")
+                    default_noon_followup = f"{EMOJI['chart_up']} From noon: Progress tracking - objectives summary"
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {noon_connection.get('noon_followup', default_noon_followup)}"
+                    )
                     msg1_parts.append(f"{EMOJI['bullet']} {noon_connection.get('predictions_summary', 'Prediction accuracy: see Evening Performance Review / Daily Summary')}")
                     msg1_parts.append(f"{EMOJI['bullet']} {noon_connection.get('regime_status', 'Market regime: see ML Sentiment blocks (Noon/Evening)')}")
                 else:

@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-10-30T18:43:06.909459",
+  "analysis_type": "weekly",
+  "accuracy_analysis": {
+    "status": "success",
+    "period_analyzed": 30,
+    "prediction_pairs": [],
+    "accuracy_metrics": {},
+    "improvement_suggestions": []
+  },
+  "coherence_analysis": {
+    "status": "success",
+    "period_analyzed": 14,
+    "coherence_scores": {},
+    "coherence_trends": {},
+    "improvement_suggestions": []
+  },
+  "combined_suggestions": [],
+  "status": "completed",
+  "summary": {
+    "total_suggestions": 0,
+    "accuracy_status": "needs_improvement",
+    "coherence_status": "unknown",
+    "priority_actions": [
+      "Improve prediction accuracy"
+    ],
+    "next_analysis_date": "2025-11-06T18:43:07.048908"
+  }
+}

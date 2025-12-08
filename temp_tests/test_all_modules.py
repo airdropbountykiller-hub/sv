@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """Test all SV modules functionality"""
 import sys
-sys.path.insert(0, 'H:\\il mio drive\\sv')
+from pathlib import Path
+
+
+# Ensure the repository root is on sys.path so modules can be imported in any
+# environment (not just the original Windows path used when the script was
+# created).
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 print("\n" + "="*50)
 print("SV MODULES - COMPLETE TEST SUITE")

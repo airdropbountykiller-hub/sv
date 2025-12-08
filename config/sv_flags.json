@@ -1,0 +1,12 @@
+{
+  "press_review_sent": true,
+  "morning_sent": true,
+  "noon_sent": true,
+  "evening_sent": false,
+  "summary_sent": false,
+  "weekly_sent": true,
+  "monthly_sent": false,
+  "quarterly_sent": false,
+  "semestral_sent": false,
+  "last_reset_date": "20251208"
+}

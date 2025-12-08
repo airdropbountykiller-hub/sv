@@ -1,0 +1,104 @@
+{
+  "generated_at": "2025-12-07T20:10:39.898023+01:00",
+  "days_back": 7,
+  "entries": [
+    {
+      "date": "2025-12-01",
+      "coherence_score": 0.0,
+      "daily_accuracy": 0.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "NEGATIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-01.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-01.json"
+      }
+    },
+    {
+      "date": "2025-12-02",
+      "coherence_score": 0.0,
+      "daily_accuracy": 100.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "NEGATIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-02.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-02.json"
+      }
+    },
+    {
+      "date": "2025-12-03",
+      "coherence_score": 0.0,
+      "daily_accuracy": 0.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "NEGATIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-03.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-03.json"
+      }
+    },
+    {
+      "date": "2025-12-04",
+      "coherence_score": 0.0,
+      "daily_accuracy": 0.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "POSITIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-04.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-04.json"
+      }
+    },
+    {
+      "date": "2025-12-05",
+      "coherence_score": 0.0,
+      "daily_accuracy": 0.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "NEGATIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-05.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-05.json"
+      }
+    },
+    {
+      "date": "2025-12-06",
+      "coherence_score": 0.0,
+      "daily_accuracy": 0.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "NEGATIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-06.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-06.json"
+      }
+    },
+    {
+      "date": "2025-12-07",
+      "coherence_score": 0.0,
+      "daily_accuracy": 0.0,
+      "messages_sent": 21,
+      "pages_generated": 6,
+      "sentiment_evolution": "NEGATIVE",
+      "news_volume": 15,
+      "predictions_count": 1,
+      "sources": {
+        "journal": "H:\\Il mio Drive\\sv\\reports\\8_daily_content\\10_daily_journal\\journal_2025-12-07.json",
+        "predictions": "H:\\Il mio Drive\\sv\\reports\\1_daily\\predictions_2025-12-07.json"
+      }
+    }
+  ]
+}

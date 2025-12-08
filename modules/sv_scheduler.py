@@ -17,6 +17,8 @@ from typing import Dict, Optional, List
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
+from config import sv_paths
+
 # Import SV Calendar for market intelligence
 from modules.sv_calendar import SVCalendarSystem
 
@@ -64,7 +66,7 @@ class SVScheduler:
             "CLOSED": {"priority": "low", "frequency_modifier": 0.6}
         }
         
-        self.flags_file = os.path.join(project_root, 'backups', 'sv_flags.json')
+        self.flags_file = os.path.join(sv_paths.BACKUPS_DIR, 'sv_flags.json')
         self.flags = {
             "press_review_sent": False,
             "morning_sent": False,
@@ -84,7 +86,7 @@ class SVScheduler:
     def ensure_directories(self):
         """Create necessary directories"""
         directories = [
-            os.path.join(project_root, 'backups'),
+            sv_paths.BACKUPS_DIR,
             os.path.join(project_root, 'reports', '1_daily'),
             os.path.join(project_root, 'reports', '2_weekly'),
             os.path.join(project_root, 'reports', '3_monthly'),

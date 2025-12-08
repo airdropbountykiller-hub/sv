@@ -9,10 +9,10 @@ Design goals (phase 1):
   (reports/8_daily_content/10_daily_journal/journal_YYYY-MM-DD.json).
 - Read prediction files (reports/1_daily/predictions_YYYY-MM-DD.json).
 - Produce per-day JSON metrics files under:
-    backups/ml_analysis/coherence_YYYY-MM-DD.json
-    backups/daily_contexts/context_YYYY-MM-DD.json
+    config/backups/ml_analysis/coherence_YYYY-MM-DD.json
+    config/backups/daily_contexts/context_YYYY-MM-DD.json
 - Produce a rolling history file with last N days:
-    backups/ml_analysis/coherence_history.json
+    config/backups/ml_analysis/coherence_history.json
 
 This module does NOT generate messages; it only consolidates metrics
 for Engine/Brain and offline analysis.
@@ -26,6 +26,8 @@ import logging
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+
+from config import sv_paths
 
 log = logging.getLogger(__name__)
 
@@ -80,8 +82,9 @@ class CoherenceManager:
         self.journal_dir = self.reports_dir / "10_daily_journal"
         self.pred_dir = self.project_root / "reports" / "1_daily"
 
-        self.analysis_dir = self.project_root / "backups" / "ml_analysis"
-        self.context_dir = self.project_root / "backups" / "daily_contexts"
+        backups_dir = Path(sv_paths.BACKUPS_DIR)
+        self.analysis_dir = backups_dir / "ml_analysis"
+        self.context_dir = backups_dir / "daily_contexts"
         self.analysis_dir.mkdir(parents=True, exist_ok=True)
         self.context_dir.mkdir(parents=True, exist_ok=True)
 

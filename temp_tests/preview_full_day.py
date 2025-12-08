@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Generate full-day previews for SV system (Press → Morning → Noon → Evening → Summary).
 
-Outputs plain-text previews under debug_previews/ so we can manually inspect
+Outputs plain-text previews under config/debug_previews/ so we can manually inspect
 coerenza narrativa, categorie news e tono ML senza toccare Telegram.
 """
 
@@ -14,6 +14,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from config import sv_paths
+
 from modules.daily_generator import (
     generate_press_review_wrapper,
     generate_morning,
@@ -24,7 +26,7 @@ from modules.daily_generator import (
 
 
 def ensure_preview_dir() -> Path:
-    preview_dir = PROJECT_ROOT / "debug_previews"
+    preview_dir = Path(sv_paths.DEBUG_PREVIEWS_DIR)
     preview_dir.mkdir(parents=True, exist_ok=True)
     return preview_dir
 

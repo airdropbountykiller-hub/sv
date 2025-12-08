@@ -124,9 +124,9 @@ pause
 goto menu
 
 :send_saved
-set /p FILES=Enter JSON file path(s) (space-separated): 
+set /p FILES=Enter JSON file path(s) (space-separated):
 echo Sending saved JSON(s)...
-python "scripts\send_telegram_reports.py" %FILES%
+    python "config\send_telegram_reports.py" %FILES%
 pause
 goto menu
 

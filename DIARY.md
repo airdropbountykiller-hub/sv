@@ -364,7 +364,7 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 
 ### Obiettivo
 
-- Verificare lo stato attuale dei moduli Python (`modules/`, `config/scripts/`, `temp_tests/`) per identificare:
+- Verificare lo stato attuale dei moduli Python (`modules/`, `config/`, `temp_tests/`) per identificare:
   - quali sono **core di produzione** e vanno mantenuti,
   - quali sono **utility/test**,
   - eventuali file legacy/doppi da archiviare.
@@ -391,12 +391,12 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
   - `modules/portfolio_manager.py` – usato da `daily_generator.py` (apertura posizioni + heartbeat risk) e da `sv_dashboard.py` (`/api/portfolio_snapshot`, `/api/portfolio_positions`).
 
 - **Infra & I/O (TENERE)**
-- `modules/telegram_handler.py` – usato da `manual_sender.py` e `config/scripts/send_telegram_reports.py` per l’invio Telegram.
+- `modules/telegram_handler.py` – usato da `manual_sender.py` e `config/send_telegram_reports.py` per l’invio Telegram.
   - `modules/sv_emoji.py`, `modules/sv_logging.py` – emoji e logging ASCII‑safe, usati da `daily_generator.py` e altri moduli.
   - `modules/sv_dashboard.py` – dashboard Flask, endpoint `/api/*` (news/calendar/ml/portfolio/timeline).
 
 - **Utility / Test (TENERE come strumenti)**
-- `config/scripts/send_telegram_reports.py` – richiamato da `SV_Start.bat` per inviare report JSON già salvati a Telegram; strumento operativo non di core.
+- `config/send_telegram_reports.py` – richiamato da `SV_Start.bat` per inviare report JSON già salvati a Telegram; strumento operativo non di core.
   - `temp_tests/*.py` – script di test/preview (`preview_full_day.py`, `generate_weekly.py`, `generate_monthly.py`, test qualità news, ecc.); non importati dai moduli di produzione.
 
 - **Legacy / Backup (CANDIDATO ARCHIVIAZIONE)**

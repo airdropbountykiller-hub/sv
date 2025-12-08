@@ -15,11 +15,12 @@
 
 ### 📂 Repository layout (where things live)
 - `modules/`: core runtime package
-- `config/`: configuration + operational storage and helper utilities
+- `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
   - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
   - `config/debug_previews/`: plain-text previews generated for manual inspection
-  - `config/scripts/`: operational entry points (e.g., Telegram senders, manual runners) executed with `python config/scripts/...`
-  - `config/tools/`: development/refactor utilities (e.g., merge helpers, generator splitters) kept close to configuration assets
+  - `config/send_telegram_reports.py`: entry point to push saved JSON reports to Telegram (`python config/send_telegram_reports.py ...`)
+  - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
+  - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
 - `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary tests/parking files that should not ship with production runners
 - `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `config/`.
 - Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
@@ -35,27 +36,10 @@
 #### 🩹 Se vedi conflitti di merge
 - Assicurati di avere l'ultimo stato remoto: `git fetch origin` (o il nome del tuo remote).
 - Allinea il branch: `git pull --rebase origin <branch>` e lascia che Git evidenzi i file in conflitto.
-- Per `DIARY.md` ora è impostato `merge=union` in `.gitattributes`, quindi Git dovrebbe unire automaticamente le sezioni senza conflitti. Se dovesse comunque comparire come conflicted, esegui `bash config/tools/resolve_diary_conflict.sh` per forzare la risoluzione e marcarlo come risolto.
+- Per `DIARY.md` ora è impostato `merge=union` in `.gitattributes`, quindi Git dovrebbe unire automaticamente le sezioni senza conflitti. Se dovesse comunque comparire come conflicted, esegui `bash config/resolve_diary_conflict.sh` per forzare la risoluzione e marcarlo come risolto.
 - Apri i file con marker `<<<<<<<`, `=======`, `>>>>>>>` e mantieni solo la versione corretta (tipicamente quella che sposta script/tools dentro `temp_tests/` e i backup/debug in `config/`).
 - Una volta risolto, marca i file come risolti (`git add <file>...`), poi continua il rebase con `git rebase --continue` (o fai un commit se non stai rebasing).
 - Verifica con `git status` che non ci siano altri conflitti e rilancia i comandi di push/PR.
-
-### 📂 Repository layout (where things live)
-- `modules/`: core runtime package
-- `temp_tests/`: sandbox for exploratory checks, previews, mock data, and **the home for all non-runtime assets**:
-  - `temp_tests/scripts/`: operational entry points (e.g., Telegram senders, manual runners) executed with `python temp_tests/scripts/...`
-  - `temp_tests/tools/`: development/refactor utilities that manipulate the codebase but are not part of the runtime package
-  - temporary tests, previews, and **obsolete/parking files** that should not ship with production runners
-- `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `temp_tests/`.
-- Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
-
-> ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
-
-#### 🔼 Come caricare le modifiche su GitHub
-- Verifica/aggiungi il remote con le tue credenziali: `git remote -v` (oppure `git remote add origin <URL_REPO>`).
-- Esegui i commit localmente (`git status`, `git add ...`, `git commit -m "..."`).
-- Pubblica con `git push origin <branch>` oppure apri una Pull Request dal tuo fork/branch remoto.
-- Se usi credenziali SSH/HTTPS, assicurati che l'ambiente locale abbia i token/chiavi configurati (non vengono gestiti automaticamente dall'assistente).
 
 ### 🌍 **COMPLETE ENGLISH SYSTEM + TELEGRAM INTEGRATION (v1.4.0)**
 

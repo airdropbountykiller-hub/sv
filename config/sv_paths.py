@@ -23,26 +23,22 @@ def get_data_dir():
 def get_cache_dir():
     """Get cache directory (in data/)"""
     cache_dir = os.path.join(get_data_dir(), 'cache')
-    os.makedirs(cache_dir, exist_ok=True)
     return cache_dir
 
 def get_news_cache_dir():
     """Get news cache directory (in data/)"""
     news_cache_dir = os.path.join(get_data_dir(), 'news_cache')
-    os.makedirs(news_cache_dir, exist_ok=True)
     return news_cache_dir
 
 def get_backups_dir():
     """Get backups directory (for flags and system state)"""
     backups_dir = os.path.join(get_config_dir(), 'backups')
-    os.makedirs(backups_dir, exist_ok=True)
     return backups_dir
 
 
 def get_debug_previews_dir():
     """Get debug previews directory (text previews of generated content)"""
     previews_dir = os.path.join(get_config_dir(), 'debug_previews')
-    os.makedirs(previews_dir, exist_ok=True)
     return previews_dir
 
 def get_reports_dir():
@@ -76,7 +72,7 @@ def setup_all_directories():
     """Create all necessary directories"""
     directories = [
         DATA_DIR,
-        CACHE_DIR, 
+        CACHE_DIR,
         NEWS_CACHE_DIR,
         BACKUPS_DIR,
         REPORTS_DIR,
@@ -84,7 +80,7 @@ def setup_all_directories():
         CONFIG_DIR,
         DEBUG_PREVIEWS_DIR
     ]
-    
+
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
     

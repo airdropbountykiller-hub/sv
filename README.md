@@ -20,6 +20,7 @@
   - `temp_tests/tools/`: development/refactor utilities that manipulate the codebase but are not part of the runtime package
   - temporary tests, previews, and **obsolete/parking files** that should not ship with production runners
 - `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `temp_tests/`.
+- Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
 
 > ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
 

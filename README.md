@@ -13,6 +13,20 @@
 1. **Sends structured financial messages** across different time horizons (intraday to annual) with predictive verification
 2. **Offers web dashboard** for real-time monitoring of event calendar and financial news
 
+### 📂 Repository layout (where things live)
+- `modules/`: core runtime package
+- `scripts/`: operational entry points (e.g., Telegram senders, manual runners) executed directly with `python scripts/...`
+- `tools/`: development/refactor utilities that manipulate the codebase but are not part of the runtime package
+- `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary utilities that accompany tests without affecting production runners
+
+> ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
+
+#### 🔼 Come caricare le modifiche su GitHub
+- Verifica/aggiungi il remote con le tue credenziali: `git remote -v` (oppure `git remote add origin <URL_REPO>`).
+- Esegui i commit localmente (`git status`, `git add ...`, `git commit -m "..."`).
+- Pubblica con `git push origin <branch>` oppure apri una Pull Request dal tuo fork/branch remoto.
+- Se usi credenziali SSH/HTTPS, assicurati che l'ambiente locale abbia i token/chiavi configurati (non vengono gestiti automaticamente dall'assistente).
+
 ### 🌍 **COMPLETE ENGLISH SYSTEM + TELEGRAM INTEGRATION (v1.4.0)**
 
 ✅ **Full English System**: Zero Italian terms remaining - complete professional English localization  

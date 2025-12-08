@@ -1,5 +1,0 @@
-__pycache__/
-*.pyc
-# legacy top-level folders are consolidated under temp_tests/
-/scripts/
-/tools/

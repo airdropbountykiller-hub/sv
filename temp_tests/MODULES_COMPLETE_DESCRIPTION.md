@@ -78,13 +78,13 @@ Il sistema SV è costruito con un'architettura modulare dove ogni componente ha 
   - `coherence_score` Press→Morning→Noon→Evening→Summary.
   - `sentiment_evolution` e `news_volume`.
 - Salvare:
-  - `backups/ml_analysis/coherence_YYYY-MM-DD.json` (metriche per day).
-  - `backups/daily_contexts/context_YYYY-MM-DD.json` (snapshot narrativo).
-  - `backups/ml_analysis/coherence_history.json` (storico multi‑giorno).
+  - `config/backups/ml_analysis/coherence_YYYY-MM-DD.json` (metriche per day).
+  - `config/backups/daily_contexts/context_YYYY-MM-DD.json` (snapshot narrativo).
+  - `config/backups/ml_analysis/coherence_history.json` (storico multi‑giorno).
 
 **🔗 Interconnessioni**:
 - **Input**: `reports/8_daily_content/10_daily_journal/`, `reports/1_daily/predictions_*.json`.
-- **Output**: File JSON in `backups/` usati da Engine/Brain per decisioni informate su più giorni.
+- **Output**: File JSON in `config/backups/` usati da Engine/Brain per decisioni informate su più giorni.
 
 ---
 
@@ -150,7 +150,7 @@ Il sistema SV è costruito con un'architettura modulare dove ogni componente ha 
 **🔗 Interconnessioni**:
 - **Input**: `ml_analyzer.py` (predizioni), `momentum_indicators.py` (technical), `sv_news.py` (sentiment)
 - **Output**: Trading decisions per `daily_generator.py`, risk metrics per `weekly_generator.py`
-- **Storage**: Decisions log in `backups/daily_session.json`
+- **Storage**: Decisions log in `config/backups/daily_session.json`
 
 ---
 
@@ -440,7 +440,7 @@ main.py + engine.py (system orchestration)
 ## 💾 **STORAGE INTERACTIONS**
 
 - **`data/`**: Cache tecnica (ricreabile) - news_cache, ml_predictions, market_data
-- **`backups/`**: Business memory (critica) - daily_session.json, contexts
+- **`config/backups/`**: Business memory (critica) - daily_session.json, contexts
 - **`reports/`**: Output finale - 1_daily, 2_weekly, 3_monthly, 8_daily_content, 9_telegram_history  
 - **`config/`**: System configuration - private.txt, sv_config.py
 

@@ -40,6 +40,23 @@
 - Una volta risolto, marca i file come risolti (`git add <file>...`), poi continua il rebase con `git rebase --continue` (o fai un commit se non stai rebasing).
 - Verifica con `git status` che non ci siano altri conflitti e rilancia i comandi di push/PR.
 
+### 📂 Repository layout (where things live)
+- `modules/`: core runtime package
+- `temp_tests/`: sandbox for exploratory checks, previews, mock data, and **the home for all non-runtime assets**:
+  - `temp_tests/scripts/`: operational entry points (e.g., Telegram senders, manual runners) executed with `python temp_tests/scripts/...`
+  - `temp_tests/tools/`: development/refactor utilities that manipulate the codebase but are not part of the runtime package
+  - temporary tests, previews, and **obsolete/parking files** that should not ship with production runners
+- `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `temp_tests/`.
+- Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
+
+> ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
+
+#### 🔼 Come caricare le modifiche su GitHub
+- Verifica/aggiungi il remote con le tue credenziali: `git remote -v` (oppure `git remote add origin <URL_REPO>`).
+- Esegui i commit localmente (`git status`, `git add ...`, `git commit -m "..."`).
+- Pubblica con `git push origin <branch>` oppure apri una Pull Request dal tuo fork/branch remoto.
+- Se usi credenziali SSH/HTTPS, assicurati che l'ambiente locale abbia i token/chiavi configurati (non vengono gestiti automaticamente dall'assistente).
+
 ### 🌍 **COMPLETE ENGLISH SYSTEM + TELEGRAM INTEGRATION (v1.4.0)**
 
 ✅ **Full English System**: Zero Italian terms remaining - complete professional English localization  

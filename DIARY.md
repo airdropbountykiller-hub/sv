@@ -1,7 +1,12 @@
 # DIARIO DI BORDO - SV TRADING SYSTEM
 
 Data inizio: 2025-11-02
-Ultimo aggiornamento: 2025-11-23 13:10
+Ultimo aggiornamento: 2025-11-24 09:30
+
+## 🆕 Daily/Weekly sync - November 24, 2025
+- Weekly report polishing stabile: rigenerazione rapida con `python "temp_tests/generate_weekly.py"` per validare layout e dati reali (PDF in `reports/2_weekly/`).
+- ENGINE/BRAIN heartbeat v2 confermato: `reports/metrics/live_state.json` ora è la fonte leggera per dashboard (regime, segnali, snapshot rischio) e resta non-bloccante in caso di errori.
+- Prossimi passi: riprendere il lavoro sul Monthly report dal 25 Nov (layout + KPI compatti) mantenendo la policy "zero numeri inventati" e skip automatico quando mancano dati.
 
 ## 🚀 ENHANCEMENT PHASE v1.5.0 START - NOVEMBER 22, 2025
 

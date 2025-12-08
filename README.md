@@ -6,6 +6,11 @@
 ![Language](https://img.shields.io/badge/language-COMPLETE_ENGLISH-green.svg)
 ![Messages](https://img.shields.io/badge/messages-TELEGRAM_INTEGRATED-blue.svg)
 
+## 🆕 Latest status (Nov 24, 2025)
+- Weekly PDF/reporting polishing è stabile: se hai bisogno di rigenerare un weekly rapido usa `python "temp_tests/generate_weekly.py"` e controlla i summary in `reports/2_weekly/`.
+- ENGINE/BRAIN heartbeat v2 attivo: popola `reports/metrics/live_state.json` con regime, segnali e snapshot di rischio per dashboard/monitoring.
+- Focus prossimo step: riprendere il lavoro sul Monthly report (layout + KPI compatti) dal 25 Nov, mantenendo la regola "zero numeri inventati" su tutti i contenuti.
+
 ## 📎 **MAIN OBJECTIVE**
 
 **SV** is an automated **CONTENT CREATOR** for financial analysis and trading that combines real data (prices, news, calendar) with ML predictive processing. A local dual-function system that:

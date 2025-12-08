@@ -11,3 +11,5 @@ This folder is the staging area for exploratory checks, integration spikes, and 
 - `temp_tests/scripts/`: operational entry points (e.g., Telegram senders, manual runners) executed directly with `python temp_tests/scripts/...`.
 - `temp_tests/tools/`: development or refactor utilities that manipulate the codebase but are kept outside the runtime package.
 - `temp_tests/` root: throwaway tests, previews, fixtures, and any legacy helpers kept for reference.
+
+> Legacy top-level `scripts/` and `tools/` folders have been retired; keep all helpers inside `temp_tests/`.

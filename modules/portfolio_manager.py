@@ -10,14 +10,16 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 import logging
 
+from config import sv_paths
+
 logger = logging.getLogger(__name__)
 
 class SVPortfolioManager:
     """Manages $25K simulated portfolio tracking ML signals"""
-    
+
     def __init__(self, base_dir: str):
         self.base_dir = base_dir
-        self.portfolio_file = os.path.join(base_dir, 'backups', 'portfolio_state.json')
+        self.portfolio_file = os.path.join(sv_paths.BACKUPS_DIR, 'portfolio_state.json')
         self.history_dir = os.path.join(base_dir, 'reports', 'portfolio_history')
         
         # Portfolio configuration

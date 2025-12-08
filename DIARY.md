@@ -364,7 +364,7 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 
 ### Obiettivo
 
-- Verificare lo stato attuale dei moduli Python (`modules/`, `scripts/`, `temp_tests/`) per identificare:
+- Verificare lo stato attuale dei moduli Python (`modules/`, `temp_tests/scripts/`, `temp_tests/`) per identificare:
   - quali sono **core di produzione** e vanno mantenuti,
   - quali sono **utility/test**,
   - eventuali file legacy/doppi da archiviare.
@@ -387,25 +387,25 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
   - `modules/regime_manager.py` – usato da `daily_generator.py` (Evening, Summary, heartbeat) come unica fonte di regime/sentiment consolidato.
   - `modules/period_aggregator.py` – usato da `daily_generator.py`, `weekly_generator.py`, `monthly_generator.py` per metriche 7d/weekly/monthly.
   - `modules/risk_analyzer.py`, `modules/performance_analyzer.py`, `modules/predictive_analyzer.py`, `modules/market_regime_detector.py` – usati da `weekly_generator.py` per risk/attribution/predizioni settimanali.
-  - `modules/coherence_manager.py` – usato opzionalmente da `daily_generator.py` per analisi di coerenza multi‑giorno (output in `backups/ml_analysis`).
+  - `modules/coherence_manager.py` – usato opzionalmente da `daily_generator.py` per analisi di coerenza multi‑giorno (output in `config/backups/ml_analysis`).
   - `modules/portfolio_manager.py` – usato da `daily_generator.py` (apertura posizioni + heartbeat risk) e da `sv_dashboard.py` (`/api/portfolio_snapshot`, `/api/portfolio_positions`).
 
 - **Infra & I/O (TENERE)**
-  - `modules/telegram_handler.py` – usato da `manual_sender.py` e `scripts/send_telegram_reports.py` per l’invio Telegram.
+  - `modules/telegram_handler.py` – usato da `manual_sender.py` e `temp_tests/scripts/send_telegram_reports.py` per l’invio Telegram.
   - `modules/sv_emoji.py`, `modules/sv_logging.py` – emoji e logging ASCII‑safe, usati da `daily_generator.py` e altri moduli.
   - `modules/sv_dashboard.py` – dashboard Flask, endpoint `/api/*` (news/calendar/ml/portfolio/timeline).
 
 - **Utility / Test (TENERE come strumenti)**
-  - `scripts/send_telegram_reports.py` – richiamato da `SV_Start.bat` per inviare report JSON già salvati a Telegram; strumento operativo non di core.
+  - `temp_tests/scripts/send_telegram_reports.py` – richiamato da `SV_Start.bat` per inviare report JSON già salvati a Telegram; strumento operativo non di core.
   - `temp_tests/*.py` – script di test/preview (`preview_full_day.py`, `generate_weekly.py`, `generate_monthly.py`, test qualità news, ecc.); non importati dai moduli di produzione.
 
 - **Legacy / Backup (CANDIDATO ARCHIVIAZIONE)**
-  - `backups/daily_generator_20251122.py`:
+  - `config/backups/daily_generator_20251122.py`:
     - backup storico di `daily_generator.py` prima del refactor del 22/11,
     - spostato fuori da `modules/` per evitare confusione con il codice attivo.
 
 - **Nuovo backup di sicurezza (23 Nov, pre‑modularizzazione)**
-  - `backups/daily_generator_20251123_before_modularization.py`:
+  - `config/backups/daily_generator_20251123_before_modularization.py`:
     - snapshot completo dell’attuale `modules/daily_generator.py` **prima** di iniziare la modularizzazione Engine/Brain,
     - riferimento immediato per eventuale rollback locale.
 
@@ -413,11 +413,11 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 
 - Eseguito `python temp_tests/preview_full_day.py` dopo gli ultimi cambi (Noon filters + heartbeat v2 + dashboard); risultato:
   - ✅ Generati correttamente:
-    - Press Review (7 msgs) → `debug_previews/press.txt`
-    - Morning (3 msgs) → `debug_previews/morning.txt`
-    - Noon (3 msgs) → `debug_previews/noon.txt`
-    - Evening (3 msgs) → `debug_previews/evening.txt`
-    - Summary (6 pages) → `debug_previews/summary.txt`
+    - Press Review (7 msgs) → `config/debug_previews/press.txt`
+    - Morning (3 msgs) → `config/debug_previews/morning.txt`
+    - Noon (3 msgs) → `config/debug_previews/noon.txt`
+    - Evening (3 msgs) → `config/debug_previews/evening.txt`
+    - Summary (6 pages) → `config/debug_previews/summary.txt`
   - ⚠️ Solo warning noti/non‑bloccanti:
     - modulo opzionale `narrative_continuity` mancante,
     - `sv_calendar` legacy mancante in un blocco di fallback non usato in produzione,
@@ -544,8 +544,8 @@ Totale stimato: **~10–14h** di lavoro effettivo, spezzato in 3–4 sessioni, c
     - Piano cleanup futuro: eventuale ulteriore riduzione di questi casi, ma per ora sono documentati come eccezioni intenzionali rispetto allo snapshot ENGINE.
 
 - **Backups / snapshot da NON toccare**
-  - `backups/daily_generator_20251122.py` – backup storico pre‑modularizzazione del 22/11.
-  - `backups/daily_generator_20251123_before_modularization.py` – snapshot completo subito prima di Fase 1 ENGINE/BRAIN; riferimento sicuro se si vuole confrontare o ripristinare il comportamento precedente.
+  - `config/backups/daily_generator_20251122.py` – backup storico pre‑modularizzazione del 22/11.
+  - `config/backups/daily_generator_20251123_before_modularization.py` – snapshot completo subito prima di Fase 1 ENGINE/BRAIN; riferimento sicuro se si vuole confrontare o ripristinare il comportamento precedente.
 
 ---
 
@@ -747,7 +747,7 @@ Totale stimato: **~10–14h** di lavoro effettivo, spezzato in 3–4 sessioni, c
   - legge il Daily Journal (Page 6 + JSON in `reports/10_daily_journal`),
   - ricostruisce per ogni giorno: quali segnali erano attivi, cosa è successo realmente sui prezzi, quali target/stop sono stati colpiti,
   - calcola accuracy giornaliera per asset e un **coherence_score** Press→Morning→Noon→Evening→Summary,
-  - salva questi dati in `backups/ml_analysis/` e `backups/daily_contexts/` per essere riusati da Engine/Brain il giorno dopo (es. adattare confidence o testo).
+  - salva questi dati in `config/backups/ml_analysis/` e `config/backups/daily_contexts/` per essere riusati da Engine/Brain il giorno dopo (es. adattare confidence o testo).
 
 ### **PREVIEW LOGICA MESSAGGI (USO SNAPSHOT)**
 
@@ -921,7 +921,7 @@ python -m py_compile modules/daily_generator.py
 Collegare i **21 messaggi giornalieri** (Press→Morning→Noon→Evening→Summary) a:
 - accuratezza reale delle previsioni ML (BTC/SPX/EURUSD),
 - metrica di coerenza giornaliera,
-- file strutturati in `backups/` per Engine/Brain e analisi offline.
+- file strutturati in `config/backups/` per Engine/Brain e analisi offline.
 
 ### Implementazione
 
@@ -991,10 +991,10 @@ Collegare i **21 messaggi giornalieri** (Press→Morning→Noon→Evening→Summ
     - `DailyContextSnapshot`:
       - `market_story`, `narrative_character`, `key_turning_points`, `lessons_learned`, `tomorrow_prep`, `raw_sentiment`.
   - Salvare:
-    - `backups/ml_analysis/coherence_YYYY-MM-DD.json`
-    - `backups/daily_contexts/context_YYYY-MM-DD.json`
+    - `config/backups/ml_analysis/coherence_YYYY-MM-DD.json`
+    - `config/backups/daily_contexts/context_YYYY-MM-DD.json`
   - Generare uno storico rolling:
-    - `backups/ml_analysis/coherence_history.json` con ultimi N giorni.
+    - `config/backups/ml_analysis/coherence_history.json` con ultimi N giorni.
 
 - Funzione helper:
   ```python
@@ -1006,7 +1006,7 @@ Collegare i **21 messaggi giornalieri** (Press→Morning→Noon→Evening→Summ
 ### Impatto
 - **Evening/Noon/Summary** sono ora collegati a misure reali di accuracy (non solo testi ideali).
 - Il **Daily Journal JSON** diventa fonte unica di verità per Coherence Manager e per futuri Engine/Brain snapshot.
-- `backups/daily_contexts/` e `backups/ml_analysis/` contengono ora file strutturati per analisi multi‑giorno.
+- `config/backups/daily_contexts/` e `config/backups/ml_analysis/` contengono ora file strutturati per analisi multi‑giorno.
 
 ---
 

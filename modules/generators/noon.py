@@ -63,9 +63,19 @@ def generate_noon_update(ctx) -> List[str]:
                     continuity = get_narrative_continuity()
                     morning_connection = continuity.get_lunch_morning_connection()
                     
-                    msg1_parts.append(f"{EMOJI['bullet']} {morning_connection.get('morning_followup', f'{EMOJI["sunrise"]} From morning: Regime tracking - Intraday check')}")
-                    msg1_parts.append(f"{EMOJI['bullet']} {morning_connection.get('sentiment_tracking', f'{EMOJI["chart"]} Sentiment: Evolution analysis in progress')}")
-                    msg1_parts.append(f"{EMOJI['bullet']} {morning_connection.get('focus_areas_update', f'{EMOJI["target"]} Focus areas: Progress check active')}")
+                    default_followup = f"{EMOJI['sunrise']} From morning: Regime tracking - Intraday check"
+                    default_sentiment = f"{EMOJI['chart']} Sentiment: Evolution analysis in progress"
+                    default_focus = f"{EMOJI['target']} Focus areas: Progress check active"
+
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {morning_connection.get('morning_followup', default_followup)}"
+                    )
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {morning_connection.get('sentiment_tracking', default_sentiment)}"
+                    )
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {morning_connection.get('focus_areas_update', default_focus)}"
+                    )
                     
                     if 'predictions_check' in morning_connection:
                         msg1_parts.append(f"{EMOJI['bullet']} {morning_connection['predictions_check']}")

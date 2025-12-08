@@ -63,9 +63,19 @@ def generate_morning_report(ctx) -> List[str]:
                     continuity = get_narrative_continuity()
                     rassegna_connection = continuity.get_morning_rassegna_connection()
                     
-                    msg1_parts.append(f"{EMOJI['bullet']} {rassegna_connection.get('rassegna_followup', f'{EMOJI["news"]} Press review sync in progress')}")
-                    msg1_parts.append(f"{EMOJI['bullet']} {rassegna_connection.get('sector_continuation', f'{EMOJI["target"]} Multi-sector momentum tracking')}")
-                    msg1_parts.append(f"{EMOJI['bullet']} {rassegna_connection.get('risk_update', f'{EMOJI["shield"]} Risk theme: Balanced - ML confirmation')}")
+                    default_followup = f"{EMOJI['news']} Press review sync in progress"
+                    default_sector = f"{EMOJI['target']} Multi-sector momentum tracking"
+                    default_risk = f"{EMOJI['shield']} Risk theme: Balanced - ML confirmation"
+
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {rassegna_connection.get('rassegna_followup', default_followup)}"
+                    )
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {rassegna_connection.get('sector_continuation', default_sector)}"
+                    )
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} {rassegna_connection.get('risk_update', default_risk)}"
+                    )
                     
                 else:
                     # Fallback continuity
@@ -261,7 +271,16 @@ def generate_morning_report(ctx) -> List[str]:
                     momentum = min(abs(change_pct) * 2, 10)
                     
                     msg1_parts.append(f"{EMOJI['bullet']} *BTC Live*: ${price:,.0f} ({change_pct:+.1f}%) {trend_direction}")
-                    msg1_parts.append(f"{EMOJI['bullet']} *Momentum Score*: {momentum:.1f}/10 - {f'{EMOJI["fire"]} Strong' if momentum > 6 else f'{EMOJI["lightning"]} Moderate' if momentum > 3 else f'{EMOJI["blue_circle"]} Weak'}")
+                    if momentum > 6:
+                        momentum_tag = f"{EMOJI['fire']} Strong"
+                    elif momentum > 3:
+                        momentum_tag = f"{EMOJI['lightning']} Moderate"
+                    else:
+                        momentum_tag = f"{EMOJI['blue_circle']} Weak"
+
+                    msg1_parts.append(
+                        f"{EMOJI['bullet']} *Momentum Score*: {momentum:.1f}/10 - {momentum_tag}"
+                    )
                     
                     # Enhanced Support/Resistance con distanze precise
                     sr_data = calculate_crypto_support_resistance(price, change_pct)

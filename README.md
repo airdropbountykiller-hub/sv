@@ -13,6 +13,34 @@
 1. **Sends structured financial messages** across different time horizons (intraday to annual) with predictive verification
 2. **Offers web dashboard** for real-time monitoring of event calendar and financial news
 
+### 📂 Repository layout (where things live)
+- `modules/`: core runtime package
+- `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
+  - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
+  - `config/debug_previews/`: plain-text previews generated for manual inspection
+  - `config/send_telegram_reports.py`: entry point to push saved JSON reports to Telegram (`python config/send_telegram_reports.py ...`)
+  - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
+  - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
+- `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary tests/parking files that should not ship with production runners
+- `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `config/`.
+- Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
+
+> ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
+
+#### 🔼 Come caricare le modifiche su GitHub
+- Verifica/aggiungi il remote con le tue credenziali: `git remote -v` (oppure `git remote add origin <URL_REPO>`).
+- Esegui i commit localmente (`git status`, `git add ...`, `git commit -m "..."`).
+- Pubblica con `git push origin <branch>` oppure apri una Pull Request dal tuo fork/branch remoto.
+- Se usi credenziali SSH/HTTPS, assicurati che l'ambiente locale abbia i token/chiavi configurati (non vengono gestiti automaticamente dall'assistente).
+
+#### 🩹 Se vedi conflitti di merge
+- Assicurati di avere l'ultimo stato remoto: `git fetch origin` (o il nome del tuo remote).
+- Allinea il branch: `git pull --rebase origin <branch>` e lascia che Git evidenzi i file in conflitto.
+- Per `DIARY.md` ora è impostato `merge=union` in `.gitattributes`, quindi Git dovrebbe unire automaticamente le sezioni senza conflitti. Se dovesse comunque comparire come conflicted, esegui `bash config/resolve_diary_conflict.sh` per forzare la risoluzione e marcarlo come risolto.
+- Apri i file con marker `<<<<<<<`, `=======`, `>>>>>>>` e mantieni solo la versione corretta (tipicamente quella che sposta script/tools dentro `temp_tests/` e i backup/debug in `config/`).
+- Una volta risolto, marca i file come risolti (`git add <file>...`), poi continua il rebase con `git rebase --continue` (o fai un commit se non stai rebasing).
+- Verifica con `git status` che non ci siano altri conflitti e rilancia i comandi di push/PR.
+
 ### 🌍 **COMPLETE ENGLISH SYSTEM + TELEGRAM INTEGRATION (v1.4.0)**
 
 ✅ **Full English System**: Zero Italian terms remaining - complete professional English localization  
@@ -134,7 +162,7 @@ Previous: Dynamic BTC Levels, Honest Accuracy, Intraday News Engine & Macro Clea
 |- ✅ **Evening Performance Review reso onesto**: nessun "4/4 (100%)" hard-coded; blocco *Trading Performance Summary* ora è condizionale su `hits/total` (Strong/Good/Mixed/Challenging).
 |- ✅ **Summary Page 2/3 coerenti**: se `accuracy_pct=0` la sezione *Technical Signals* assume tono critico e le *Risk Metrics* mostrano Sharpe/Win Rate coerenti (o N.A. quando mancano dati).
 |- ✅ **Intraday sentiment tracking**: Press→Morning→Noon→Evening salvano sentiment in `reports/8_daily_content/sentiment_tracking_YYYY-MM-DD.json` e Summary Page 6 mostra catena reale (es. "Stable NEGATIVE throughout the day").
-|- ✅ **Structured Journal & Coherence Manager**: `journal_YYYY-MM-DD.json` include `daily_accuracy_grade` e `sentiment_intraday_evolution`; `coherence_manager.py` salva metriche in `backups/ml_analysis/coherence_YYYY-MM-DD.json` + `coherence_history.json`.
+|- ✅ **Structured Journal & Coherence Manager**: `journal_YYYY-MM-DD.json` include `daily_accuracy_grade` e `sentiment_intraday_evolution`; `coherence_manager.py` salva metriche in `config/backups/ml_analysis/coherence_YYYY-MM-DD.json` + `coherence_history.json`.
 |- ✅ **Noon 3/3 ripulito**: rimosso blocco duplicato "Morning Predictions Update"; rimane solo `MORNING PREDICTIONS VERIFICATION` + `Daily Accuracy`.
 
 **Previous (Nov 15, 2025 - v1.4.2): Content Quality Enhancement**
@@ -505,7 +533,9 @@ H:/il mio drive/sv/
 ### **📂 ORGANIZED DIRECTORIES BY FUNCTION:**
 ```
 modules/                 ← Production Python code
-config/                  ← ALL configurations centralized
+config/                  ← Config + business memory + debug previews
+  ├── backups/           ← Critical business memory (flags, contexts, ML analytics)
+  ├── debug_previews/    ← Text previews generated by temp_tests/preview_full_day.py
   ├── private.txt        ← Telegram credentials
   ├── requirements.txt   ← Python dependencies
   ├── .gitignore         ← Git exclusions
@@ -520,7 +550,6 @@ reports/                 ← System outputs by priority
   ├── 8_daily_content/   ← Content backups
   └── 9_telegram_history/ ← Message delivery logs
 data/                    ← Technical cache (auto-recreated)
-backups/                 ← Business memory (critical)
 temp_tests/              ← Development & testing area
 ```
 
@@ -537,11 +566,11 @@ data/
 ```
 **Philosophy**: *"If deleted, system recreates automatically"*
 
-#### **🧠 `backups/` = BUSINESS DATA AND OPERATIONAL MEMORY**
+#### **🧠 `config/backups/` = BUSINESS DATA AND OPERATIONAL MEMORY**
 ```
-backups/
+config/backups/
 ├── daily_session.json         ← Current trading session state
-├── daily_contexts/            ← Daily market narrative + tomorrow setup snapshots  
+├── daily_contexts/            ← Daily market narrative + tomorrow setup snapshots
 └── ml_analysis/               ← Historical coherence + accuracy metrics
     ├── coherence_YYYY-MM-DD.json   ← Per-day coherence + accuracy (Coherence Manager)
     ├── coherence_history.json      ← Rolling window of last N days (trend)
@@ -551,7 +580,7 @@ backups/
 
 #### **🎭 SIMPLE ANALOGY:**
 - **`data/` = ENGINE ROOM** → Engines, cache, system logs (repairable)
-- **`backups/` = BRAIN** → Memories, decisions, continuity (irreplaceable)
+- **`config/backups/` = BRAIN** → Memories, decisions, continuity (irreplaceable)
 
 ---
 
@@ -598,7 +627,7 @@ Monday 08:35 → 📊 WEEKLY REPORT     (After press review)
 #### **⚠️ DEVELOPMENT COMMANDMENTS:**
 1. **NEVER modify ROOT structure without explicit approval**
 2. **ALWAYS put development code in `temp_tests/`**  
-3. **NEVER mix technical data (`data/`) with business (`backups/`)**
+3. **NEVER mix technical data (`data/`) with business (`config/backups/`)**
 4. **ALWAYS respect numerical priority in reports (1=maximum)**
 5. **NEVER change scheduler hours without authorization**
 
@@ -626,7 +655,7 @@ monthly_generator.py     ← Monthly comprehensive reports
 ```
 momentum_indicators.py   ← Intraday signals and technical ML helpers
 regime_manager.py        ← Unified regime/sentiment manager (Engine↔Brain bridge)
-coherence_manager.py     ← Aggregates daily coherence + accuracy metrics into backups/
+coherence_manager.py     ← Aggregates daily coherence + accuracy metrics into config/backups/
 period_aggregator.py     ← Weekly/monthly aggregations from daily_metrics_YYYY-MM-DD.json
 ```
 
@@ -705,7 +734,7 @@ pdf_generator.py        ← Professional PDF reports system (ENHANCED)
 ```
 daily_generator_backup_20251122.py  ← Legacy backup of daily_generator (Nov 22, 2025)
   └── Not imported anywhere; kept only as historical reference.
-  └── Recommended: move under backups/ or remove once no longer needed.
+  └── Recommended: move under config/backups/ or remove once no longer needed.
 ```
 
 ---
@@ -747,7 +776,7 @@ daily_generator_backup_20251122.py  ← Legacy backup of daily_generator (Nov 22
 - **Brain**: takes the Engine’s technical snapshot and, using the shared 555 ML model families (AdaBoost, Random Forest, XGBoost, SVM, etc.), produces **ML sentiment, market regime, and per-asset trading signals** (entry/target/stop, confidence, R:R, catalyst).
 - The result is a structured **market snapshot** for that time slot (e.g. 08:30, 13:00) that is cached briefly and used by all message generators.
 - Each message keeps its **existing template/structure** (7 PR, 3+3+3 intraday, 6 Summary), but acts as a pure **formatter** that reads these snapshot fields instead of recomputing data internally.
-- A separate **Coherence Manager** layer reads the snapshots + sent messages + daily journal (Page 6 + JSON) to evaluate narrative consistency and prediction accuracy, storing metrics in `backups/` so Engine/Brain can adapt in future runs.
+- A separate **Coherence Manager** layer reads the snapshots + sent messages + daily journal (Page 6 + JSON) to evaluate narrative consistency and prediction accuracy, storing metrics in `config/backups/` so Engine/Brain can adapt in future runs.
 
 ### **🕰️ TEMPORAL PIPELINE WITH COMPLETE HIERARCHICAL VERIFICATION:**
 ```

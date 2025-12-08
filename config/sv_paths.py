@@ -34,9 +34,16 @@ def get_news_cache_dir():
 
 def get_backups_dir():
     """Get backups directory (for flags and system state)"""
-    backups_dir = os.path.join(get_project_root(), 'backups')
+    backups_dir = os.path.join(get_config_dir(), 'backups')
     os.makedirs(backups_dir, exist_ok=True)
     return backups_dir
+
+
+def get_debug_previews_dir():
+    """Get debug previews directory (text previews of generated content)"""
+    previews_dir = os.path.join(get_config_dir(), 'debug_previews')
+    os.makedirs(previews_dir, exist_ok=True)
+    return previews_dir
 
 def get_reports_dir():
     """Get reports directory"""
@@ -62,6 +69,7 @@ BACKUPS_DIR = get_backups_dir()
 REPORTS_DIR = get_reports_dir()
 TEMPLATES_DIR = get_templates_dir()
 CONFIG_DIR = get_config_dir()
+DEBUG_PREVIEWS_DIR = get_debug_previews_dir()
 
 # Verify all directories exist
 def setup_all_directories():
@@ -73,7 +81,8 @@ def setup_all_directories():
         BACKUPS_DIR,
         REPORTS_DIR,
         TEMPLATES_DIR,
-        CONFIG_DIR
+        CONFIG_DIR,
+        DEBUG_PREVIEWS_DIR
     ]
     
     for directory in directories:

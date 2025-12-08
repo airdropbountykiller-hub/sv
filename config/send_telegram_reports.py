@@ -5,7 +5,7 @@ Send one or more saved report JSONs to Telegram using the project's TelegramHand
 (which reads credentials from config/private.txt).
 
 Usage:
-  python scripts/send_telegram_reports.py <report1.json> [<report2.json> ...]
+  python config/send_telegram_reports.py <report1.json> [<report2.json> ...]
 """
 import os
 import sys
@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, 'modules'))
 from telegram_handler import TelegramHandler  # type: ignore
 
 if len(sys.argv) < 2:
-    print("Usage: python scripts/send_telegram_reports.py <report1.json> [<report2.json> ...]")
+    print("Usage: python config/send_telegram_reports.py <report1.json> [<report2.json> ...]")
     sys.exit(2)
 
 telegram = TelegramHandler()

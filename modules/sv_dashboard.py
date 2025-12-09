@@ -17,10 +17,10 @@ import time
 
 # Import SV modules with correct paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)  # Go up to project root
-modules_dir = os.path.join(parent_dir, 'modules')
-sys.path.insert(0, parent_dir)  # Add project root
-sys.path.insert(0, modules_dir)  # Add modules directory
+project_root = os.path.dirname(current_dir)  # repository root
+config_dir = os.path.join(project_root, "config")
+sys.path.insert(0, project_root)  # Enable imports from modules package at repo root
+sys.path.insert(0, config_dir)    # Add config for sv_paths and settings
 
 try:
     from modules.sv_news import get_sv_news_system
@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Base directories
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Go up from modules to project root
+BASE_DIR = project_root
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 
@@ -875,10 +875,9 @@ def check_dependencies():
 
 def setup_directories():
     """Setup required directories"""
-    # Only create runtime data directory; templates are now stored under <repo>/templates
+    # Data directory creation is intentionally disabled; callers must provision it if needed
     if not os.path.exists(DATA_DIR):
-        logger.info(f"Creating directory: {DATA_DIR}")
-        os.makedirs(DATA_DIR, exist_ok=True)
+        logger.warning(f"Data directory missing: {DATA_DIR} (creation skipped per configuration)")
 
 def open_browser():
     """Open browser after a short delay (only in main process)"""

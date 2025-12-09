@@ -17,7 +17,7 @@ class PredictiveWeeklyAnalyzer:
     """Generate predictive insights and recommendations for next week"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     def analyze_asset_patterns(self, daily_data: Dict, performance_attribution: Dict) -> Dict[str, Any]:
         """Identify asset-specific patterns and predict next week performance"""

@@ -23,7 +23,7 @@ from typing import Any, Dict, Optional
 import pytz
 
 # Project paths
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 METRICS_DIR = Path(project_root) / "reports" / "metrics"
 
 log = logging.getLogger(__name__)

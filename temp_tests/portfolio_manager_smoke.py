@@ -10,7 +10,9 @@ import os
 import sys
 from tempfile import TemporaryDirectory
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
+sys.path.extend([PROJECT_ROOT, CONFIG_DIR])
 
 from modules.portfolio_manager import SVPortfolioManager
 

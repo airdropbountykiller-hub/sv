@@ -47,7 +47,7 @@ def load_private_config(config_file: str = 'config/private.txt') -> Dict[str, st
     config = {}
     
     # Cerca il file nella directory del progetto
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     config_path = os.path.join(project_root, config_file)
     
     try:

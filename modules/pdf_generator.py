@@ -46,7 +46,7 @@ class SVPDFGeneratetor:
             raise ImportError("ReportLab package required for PDF Generatetion")
         
         # Directory per PDF output basata su timeframe
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         timeframe_folders = {
             'daily': '1_daily',
             'weekly': '2_weekly', 

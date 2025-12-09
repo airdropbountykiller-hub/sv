@@ -603,7 +603,7 @@ class SVPortfolioManager:
 def get_portfolio_manager(base_dir: str = None) -> SVPortfolioManager:
     """Get portfolio manager instance"""
     if base_dir is None:
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     return SVPortfolioManager(base_dir)
 

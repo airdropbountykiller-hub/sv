@@ -150,6 +150,17 @@ Previous: Dynamic BTC Levels, Honest Accuracy, Intraday News Engine & Macro Clea
 - **Risk Analytics**: Replace N/A values with calculated risk metrics
 - **Performance Attribution**: Sector and asset-level contribution analysis
 
+### 🔌 Portfolio manager integration (broker-aware)
+The `modules/portfolio_manager.py` class already stores broker-specific limits and cluster rules. To wire it into the runtime:
+
+1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/backups/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
+2. **Feed data**: reuse existing market sources (`modules/engine/market_data.get_market_snapshot` for BTC/SPX/EURUSD/Gold, `get_live_equity_fx_quotes` for other tickers) and pass live quotes into `update_positions`.
+3. **Route signals**: send ML prediction cards (asset/entry/stop/target/confidence/broker) to `open_position`. Automated brokers (`IG`, `BYBIT_BTC`, `BYBIT_USDT`) accept bot trades; discretionary ones (`DIRECTA`, `TRADE_REPUBLIC`) can be surfaced to a UI/advisor queue when `auto_trading=False`.
+4. **Risk guardrails**: sizing uses per-broker risk caps; `open_position` enforces max open trades, per-asset limits and cluster exposure before booking a position.
+5. **Expose output**: dashboards/APIs can read `get_portfolio_snapshot()`, while configuration/help panels can call `describe_configuration()` or `integration_overview()` for a quick summary of broker strategies and wiring.
+
+> Quick check: run `python temp_tests/portfolio_manager_smoke.py` to execute a broker-aware open/update/close cycle against a temporary portfolio file (no production state touched).
+
 #### **3.2 ML Model Enhancement**
 - **Target**: Accuracy improvement 70% → 85% within 6 months
 - **Adaptive Ensemble**: Dynamic model weights based on recent performance

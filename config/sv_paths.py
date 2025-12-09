@@ -21,7 +21,7 @@ def get_config_dir():
 
 def get_modules_dir():
     """Get modules directory"""
-    return os.path.join(get_config_dir(), 'modules')
+    return os.path.join(get_project_root(), 'modules')
 
 
 def get_data_dir():

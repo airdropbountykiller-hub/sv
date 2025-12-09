@@ -19,19 +19,44 @@
 2. **Offers web dashboard** for real-time monitoring of event calendar and financial news
 
 ### 📂 Repository layout (where things live)
-- `config/modules/`: core runtime package (nested under `config/` so all runtime code ships together)
+- `modules/`: core runtime package
 - `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
   - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
   - `config/debug_previews/`: plain-text previews generated for manual inspection
   - `config/send_telegram_reports.py`: entry point to push saved JSON reports to Telegram (`python config/send_telegram_reports.py ...`)
   - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
-  - `config/split_generators.py`: refactor utility to extract intraday generators from `config/modules/daily_generator.py`
+  - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
 - `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary tests/parking files that should not ship with production runners
-- `data/`: runtime-only; **must be provisioned manually** if you need cached inputs (no auto-creation)
 - `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `config/`.
 - Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
 
-> ℹ️ Legacy instructions that reference `config/modules/...` now map to `config/modules/...` after relocating the runtime package under `config/`.
+> ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
+
+#### 🔼 Come caricare le modifiche su GitHub
+- Verifica/aggiungi il remote con le tue credenziali: `git remote -v` (oppure `git remote add origin <URL_REPO>`).
+- Esegui i commit localmente (`git status`, `git add ...`, `git commit -m "..."`).
+- Pubblica con `git push origin <branch>` oppure apri una Pull Request dal tuo fork/branch remoto.
+- Se usi credenziali SSH/HTTPS, assicurati che l'ambiente locale abbia i token/chiavi configurati (non vengono gestiti automaticamente dall'assistente).
+
+#### 🩹 Se vedi conflitti di merge
+- Assicurati di avere l'ultimo stato remoto: `git fetch origin` (o il nome del tuo remote).
+- Allinea il branch: `git pull --rebase origin <branch>` e lascia che Git evidenzi i file in conflitto.
+- Per `DIARY.md` ora è impostato `merge=union` in `.gitattributes`, quindi Git dovrebbe unire automaticamente le sezioni senza conflitti. Se dovesse comunque comparire come conflicted, esegui `bash config/resolve_diary_conflict.sh` per forzare la risoluzione e marcarlo come risolto.
+- Apri i file con marker `<<<<<<<`, `=======`, `>>>>>>>` e mantieni solo la versione corretta (tipicamente quella che sposta script/tools dentro `temp_tests/` e i backup/debug in `config/`).
+- Una volta risolto, marca i file come risolti (`git add <file>...`), poi continua il rebase con `git rebase --continue` (o fai un commit se non stai rebasing).
+- Verifica con `git status` che non ci siano altri conflitti e rilancia i comandi di push/PR.
+
+### 📂 Repository layout (where things live)
+- `modules/`: core runtime package
+- `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
+  - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
+  - `config/debug_previews/`: plain-text previews generated for manual inspection
+  - `config/send_telegram_reports.py`: entry point to push saved JSON reports to Telegram (`python config/send_telegram_reports.py ...`)
+  - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
+  - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
+- `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary tests/parking files that should not ship with production runners
+- `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `config/`.
+- Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
 
 > ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
 
@@ -51,10 +76,10 @@
 
 ### 🌍 **COMPLETE ENGLISH SYSTEM + TELEGRAM INTEGRATION (v1.4.0)**
 
-✅ **Full English System**: Zero Italian terms remaining - complete professional English localization
-✅ **Telegram Message System**: All 5 content types fully operational with clean delivery
-✅ **Manual Control System**: Complete dual system - automated triggers + manual sending
-✅ **Message Architecture**: Multi-message structure respecting Telegram limits
+✅ **Full English System**: Zero Italian terms remaining - complete professional English localization  
+✅ **Telegram Message System**: All 5 content types fully operational with clean delivery  
+✅ **Manual Control System**: Complete dual system - automated triggers + manual sending  
+✅ **Message Architecture**: Multi-message structure respecting Telegram limits  
 ✅ **Clean Output**: ASCII-safe messages with professional headers and formatting
 
 > **📝 ACHIEVEMENT**: System is now **FULLY OPERATIONAL** with complete English localization and working Telegram integration.
@@ -66,6 +91,32 @@
 - **Clean Headers**: Fixed "Generic" issue - now shows correct content types (Press Review, Morning Report, etc.)
 - **Emoji Safety**: Replaced problematic Unicode with ASCII-safe tags `[PR] [AM] [NOON] [PM] [SUM]`
 - **Dual System**: Automated scheduling + manual override with `--force` and `--preview` options
+
+---
+
+## 🆕 Recent Enhancements (Nov 19–22, 2025)
+
+### 📅 Short‑term plan
+- Fino a Lunedì 24 Nov: focus sul WEEKLY (contenuti + grafici data‑driven)
+- Martedì 25 Nov: ripresa lavori sul MONTHLY (asset focus, next month focus, dashboard)
+**Latest: Weekly PDF Pro layout + Charts + Data‑Driven Content (v1.5.0)**
+- Executive Summary con Best/Worst day reali, Highlights, sezione "What worked / What didn’t" e Focus Assets
+- Grafici integrati: Daily Accuracy Trend (con overlay di trend), Asset Performance, Risk Metrics, Weekly Dashboard
+- Raccomandazioni ripulite e 0 numeri inventati (sezioni/grafici nascosti se dati assenti)
+
+Previous: Dynamic BTC Levels, Honest Accuracy, Intraday News Engine & Macro Cleanup (v1.4.4)
+
+## 🚀 **PLANNED ENHANCEMENTS (v1.5.0 - Nov 22, 2025)**
+**Next Phase: Narrative Coherence, Multi-Asset Completion & Architecture Enhancement**
+
+### **🎯 FASE 1: Quick Wins (Week 1-2)**
+#### **1.1 Regime Manager Integration** ✅
+- **Status**: Implemented `modules/regime_manager.py` for unified sentiment and regime management
+- **Objective**: Eliminate narrative contradictions between Evening ("risk-off") and Summary ("risk-on")
+- **Features**: Dynamic session character, market momentum, risk assessment based on real accuracy
+- **Test Result**: ✅ Coherence score 75% with 0% accuracy (Grade D) → "Risk-off rotation - defensive positioning"
+
+#### **1.2 Complete Multi-Asset Data Integration** 🔄
 - **SPX Dynamic Levels**: Replace static 5400/5430/5375 with live `^GSPC` calculations
 - **EUR/USD Real-Time**: Replace static 1.085/1.075/1.09 with live EURUSD quotes
 - **Gold XAUUSD Integration**: Complete Gold data-driven approach with `XAUUSD=X` feed
@@ -82,10 +133,10 @@
 - **Brain Module**: ML predictions, sentiment analysis, regime detection
 - **Generators Refactor**: Content formatters consuming snapshots instead of recalculating
 - **Current implementation (Nov 23, 2025)**:
-  - `config/modules/engine/market_data.get_market_snapshot(now)` is the canonical source for BTC/SPX/EURUSD/GOLD (USD/g) snapshots used by heartbeat, generators and dashboard.
-  - `config/modules/brain/prediction_eval.evaluate_predictions(now)` wraps the main prediction evaluation (`_evaluate_predictions_with_live_data`) so all components share the same daily accuracy.
-  - `config/modules/brain/prediction_status.compute_prediction_status(...)` provides per-signal status (Hit/Stopped/Pending, progress, R:R) for dashboard and future generators.
-  - `config/modules/brain.regime_detection` + `config/modules/regime_manager` centralise regime/sentiment logic, while generators only format the narrative.
+  - `modules/engine/market_data.get_market_snapshot(now)` is the canonical source for BTC/SPX/EURUSD/GOLD (USD/g) snapshots used by heartbeat, generators and dashboard.
+  - `modules/brain/prediction_eval.evaluate_predictions(now)` wraps the main prediction evaluation (`_evaluate_predictions_with_live_data`) so all components share the same daily accuracy.
+  - `modules/brain/prediction_status.compute_prediction_status(...)` provides per-signal status (Hit/Stopped/Pending, progress, R:R) for dashboard and future generators.
+  - `modules/brain.regime_detection` + `modules.regime_manager` centralise regime/sentiment logic, while generators only format the narrative.
 - **Implementation Tracking**: detailed status, canonical sources and remaining duplicates are documented in `DIARY.md` under "MODULARIZATION PLAN – ENGINE/BRAIN & CLEANUP (NOVEMBER 23, 2025)" (sections "Stato implementazione ENGINE/BRAIN" e "Puntamento sorgenti / duplicati").
 
 #### **2.2 Snapshot-Based Architecture**
@@ -98,17 +149,6 @@
 - **P&L Tracking**: Connect to real portfolio for authentic Sharpe/drawdown metrics
 - **Risk Analytics**: Replace N/A values with calculated risk metrics
 - **Performance Attribution**: Sector and asset-level contribution analysis
-
-### 🔌 Portfolio manager integration (broker-aware)
-The `config/modules/portfolio_manager.py` class already stores broker-specific limits and cluster rules. To wire it into the runtime:
-
-1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/backups/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
-2. **Feed data**: reuse existing market sources (`config/modules/engine/market_data.get_market_snapshot` for BTC/SPX/EURUSD/Gold, `get_live_equity_fx_quotes` for other tickers) and pass live quotes into `update_positions`.
-3. **Route signals**: send ML prediction cards (asset/entry/stop/target/confidence/broker) to `open_position`. Automated brokers (`IG`, `BYBIT_BTC`, `BYBIT_USDT`) accept bot trades; discretionary ones (`DIRECTA`, `TRADE_REPUBLIC`) can be surfaced to a UI/advisor queue when `auto_trading=False`.
-4. **Risk guardrails**: sizing uses per-broker risk caps; `open_position` enforces max open trades, per-asset limits and cluster exposure before booking a position.
-5. **Expose output**: dashboards/APIs can read `get_portfolio_snapshot()`, while configuration/help panels can call `describe_configuration()` or `integration_overview()` for a quick summary of broker strategies and wiring.
-
-> Quick check: run `python temp_tests/portfolio_manager_smoke.py` to execute a broker-aware open/update/close cycle against a temporary portfolio file (no production state touched).
 
 #### **3.2 ML Model Enhancement**
 - **Target**: Accuracy improvement 70% → 85% within 6 months
@@ -135,11 +175,11 @@ The `config/modules/portfolio_manager.py` class already stores broker-specific l
 |
 **New (Nov 21–22, 2025): Daily Metrics Snapshots, ENGINE/BRAIN Heartbeat, Evening Coherence & RSS Expansion**
 ||||||- ✅ **Daily metrics snapshot (ENGINE)**: `generate_daily_summary()` salva ora `reports/metrics/daily_metrics_YYYY-MM-DD.json` con `prediction_eval` reale (hits/misses/pending/total_tracked/accuracy_pct) + `market_snapshot` per BTC, SPX, EUR/USD e Gold (sempre in USD/g, nessun numero inventato).
-||||||- ✅ **`config/modules/period_aggregator.py` (WEEKLY/MONTHLY)**: nuovo modulo che aggrega solo dati salvati (nessun accesso live) e calcola metriche di periodo: accuracy combinata, ritorni Mon→Fri / calendario mensile per BTC, SPX, EUR/USD e Gold (USD/g).
+||||||- ✅ **`modules/period_aggregator.py` (WEEKLY/MONTHLY)**: nuovo modulo che aggrega solo dati salvati (nessun accesso live) e calcola metriche di periodo: accuracy combinata, ritorni Mon→Fri / calendario mensile per BTC, SPX, EUR/USD e Gold (USD/g).
 ||||||- ✅ **Weekly report & PDF senza numeri finti**: `weekly_generator.py` usa `get_weekly_metrics()` per tutte le % di performance e accuracy mostrate; dove mancano dati i campi diventano `n/a` o descrizioni qualitative (Sharpe, VaR, drawdown restano esplicitamente N/A finché non esiste una P&L reale).
 ||||||- ✅ **Monthly report & PDF agganciati ai dati**: `monthly_generator.py` usa `get_monthly_metrics()` per accuracy e ritorni di BTC/SPX/EUR/USD/Gold USD/g; le vecchie percentuali decorative (es. "+4.8%", Sharpe/Sortino/correlation precise) sono state convertite in testo qualitativo o marcate come N/A, mai inventate.
 ||||||- ✅ **Coerenza multi‑timeframe**: Daily, Weekly e Monthly condividono ora lo stesso flusso dati: prezzi live → snapshot giornalieri → aggregatore → report; Gold è sempre normalizzato in USD/g quando appaiono numeri.
-||||||- ✅ **Intraday ENGINE logging (press_review → morning → noon → evening → summary + 30‑min heartbeats)**: ogni stage principale salva un snapshot strutturato in `reports/metrics/engine_YYYY-MM-DD.json` con sentiment reale, asset snapshot (BTC, SPX, EUR/USD, Gold in USD/g) e, dove applicabile, `prediction_eval` parziali/finali; in più, il main orchestrator (`config/modules/main.py continuous`) esegue un **ENGINE+BRAIN heartbeat** circa ogni 30 minuti (solo metriche, nessun messaggio) che aggiorna lo stesso file con stage `heartbeat`.
+||||||- ✅ **Intraday ENGINE logging (press_review → morning → noon → evening → summary + 30‑min heartbeats)**: ogni stage principale salva un snapshot strutturato in `reports/metrics/engine_YYYY-MM-DD.json` con sentiment reale, asset snapshot (BTC, SPX, EUR/USD, Gold in USD/g) e, dove applicabile, `prediction_eval` parziali/finali; in più, il main orchestrator (`modules/main.py continuous`) esegue un **ENGINE+BRAIN heartbeat** circa ogni 30 minuti (solo metriche, nessun messaggio) che aggiorna lo stesso file con stage `heartbeat`.
 ||||||- ✅ **Macro Context Snapshot pulito**: Morning 1/3 (Market Pulse) ora descrive DXY, US10Y e VIX in forma puramente qualitativa (bias/regime) senza più valori numerici derivati dal sentiment; gli unici numeri mostrati sono quelli derivati da feed reali (SPX, EUR/USD, Gold USD/g) o dalle prediction live.
 ||||||- ✅ **Evening Performance Review allineato alla accuracy reale**: Evening 2/3 (`SV - PERFORMANCE REVIEW`) deriva ora il testo *ML MODEL RESULTS* da `hits/total` (es. con 0% mostra "ensemble non allineato ai movimenti di oggi", "segnali non confermati dal price action"), eliminando frasi eccessivamente positive in giornate negative.
 ||||||- ✅ **Tomorrow Risk Bias dinamico**: Evening 3/3 (`SV - TOMORROW SETUP`) usa `DailyRegimeManager.get_tomorrow_strategy_bias()` per scegliere fra `Risk-on maintained`, `Defensive bias` o `Neutral bias` invece di usare sempre un bias risk-on fisso.
@@ -182,7 +222,7 @@ The `config/modules/portfolio_manager.py` class already stores broker-specific l
   - Signals results by asset (hit rate per asset) via `/api/ml/asset_results` (added)
   - Main ML analysis endpoint `/api/ml` usa previsioni reali + prezzi live per calcolare `overall_accuracy`, momentum e risk metrics.
 - New portfolio & timeline endpoints (COMPLETED):
-  - `/api/portfolio_snapshot` e `/api/portfolio_positions` esposti dalla dashboard per il portafoglio simulato $25K gestito da `config/modules/portfolio_manager.py`.
+  - `/api/portfolio_snapshot` e `/api/portfolio_positions` esposti dalla dashboard per il portafoglio simulato $25K gestito da `modules/portfolio_manager.py`.
   - `/api/intraday_timeline` legge `reports/metrics/engine_YYYY-MM-DD.json` e costruisce una timeline Press→Morning→Noon→Evening→Summary con accuracy e stato (completed/pending).
 - Upcoming polish (to do):
   - Asset filter/drill‑down e timeline grafica avanzata (Press→Morning→Noon→Evening)
@@ -221,22 +261,22 @@ All 22 messages sent successfully ✓
 
 ### ▶️ How to run continuously (auto-schedule)
 - Windows quickstart: double-click `SV_Start.bat` (starts orchestrator + dashboard + integrated control menu)
-- Background only: `Start-Process python -ArgumentList "config/modules/main.py","continuous" -WindowStyle Minimized`
-- Foreground only: `python config/modules/main.py continuous`
-- Single check: `python config/modules/main.py single`
+- Background only: `Start-Process python -ArgumentList "modules/main.py","continuous" -WindowStyle Minimized`
+- Foreground only: `python modules/main.py continuous`
+- Single check: `python modules/main.py single`
 
 ⏱ Retry policy (anti-spam): orchestrator tenta ciascun contenuto PENDING al massimo ogni 30 minuti; i flag evitano duplicati.
 
 ### 🧪 Tests
 - Quick: `python temp_tests/test_quick_wins.py`
 - Improvements: `python temp_tests/test_improvements.py`
-- Syntax check: `python -m py_compile config/modules/daily_generator.py`
+- Syntax check: `python -m py_compile modules/daily_generator.py`
 - Full temp suite (PDF, Telegram, regime manager, generators): `python -m pytest temp_tests -q`
 
 **Last verified: 2025-11-25 22:10 CET**
 |- ✅ `python -m pytest temp_tests -q` → 13 tests passed (warnings only about tests returning bool instead of using `assert`).
-|- ✅ `python -m py_compile config/modules/daily_generator.py` completed successfully.
-|- ✅ `python config/modules/regime_manager.py` → All regime manager tests passed!
+|- ✅ `python -m py_compile modules/daily_generator.py` completed successfully.
+|- ✅ `python modules/regime_manager.py` → All regime manager tests passed!
 |- ✅ Enhancement Plan created: `SV System Enhancement Plan - Miglioramenti Prioritizzati`
 |- Known non-blocking warnings: optional `modules.narrative_continuity` not available, Yahoo Finance 429 rate limits (SPX/EURUSD/Gold), occasional `sv_calendar` import fallback in calendar text (Summary/Evening fall back to generic "check the live economic calendar" wording), missing legacy `press_review_YYYY-MM-DD.json` for ML verification (fallback uses timestamped files).
 
@@ -362,7 +402,7 @@ All 22 messages sent successfully ✓
 ```
 📤 TELEGRAM INTEGRATION:
 ├── ✅ Automated Triggers  (5 triggers: press_review, morning, noon, evening, summary)
-├── ✅ Manual Sender       (python config/modules/manual_sender.py <type> --force)
+├── ✅ Manual Sender       (python modules/manual_sender.py <type> --force)
 ├── ✅ Preview Mode        (--preview flag for content review)
 └── ✅ Status Checking     (scheduler integration with override capability)
 
@@ -525,7 +565,7 @@ H:/il mio drive/sv/
 
 ### **📂 ORGANIZED DIRECTORIES BY FUNCTION:**
 ```
-config/modules/                 ← Production Python code
+modules/                 ← Production Python code
 config/                  ← Config + business memory + debug previews
   ├── backups/           ← Critical business memory (flags, contexts, ML analytics)
   ├── debug_previews/    ← Text previews generated by temp_tests/preview_full_day.py
@@ -697,19 +737,19 @@ trigger_semestral.py    ← Semestral PDF trigger (S start 08:50)
 #### **🛠️ MANUAL CONTROL SYSTEM (NEW v1.4.0):**
 ```
 # List available content types
-python config/modules/manual_sender.py --list
+python modules/manual_sender.py --list
 
 # Preview content before sending  
-python config/modules/manual_sender.py press_review --preview
-python config/modules/manual_sender.py morning --preview
-python config/modules/manual_sender.py summary --preview
+python modules/manual_sender.py press_review --preview
+python modules/manual_sender.py morning --preview
+python modules/manual_sender.py summary --preview
 
 # Force send (bypass scheduler)
-python config/modules/manual_sender.py press_review --force
-python config/modules/manual_sender.py morning --force
-python config/modules/manual_sender.py noon --force
-python config/modules/manual_sender.py evening --force
-python config/modules/manual_sender.py summary --force
+python modules/manual_sender.py press_review --force
+python modules/manual_sender.py morning --force
+python modules/manual_sender.py noon --force
+python modules/manual_sender.py evening --force
+python modules/manual_sender.py summary --force
 
 # All content types available:
 # press_review, morning, noon, evening, summary
@@ -812,7 +852,7 @@ cd "H:\il mio drive\sv"
 SV_Start.bat
 
 # Manual dashboard launch
-python config/modules/sv_dashboard.py
+python modules/sv_dashboard.py
 # Access: http://localhost:5000
 ```
 
@@ -847,11 +887,11 @@ python "temp_tests/generate_weekly.py"
 ### **🧪 TESTING MESSAGE SYSTEM:**
 ```bash
 # Test all message types (recommended first run)
-python config/modules/manual_sender.py press_review --force
-python config/modules/manual_sender.py morning --force  
-python config/modules/manual_sender.py noon --force
-python config/modules/manual_sender.py evening --force
-python config/modules/manual_sender.py summary --force
+python modules/manual_sender.py press_review --force
+python modules/manual_sender.py morning --force  
+python modules/manual_sender.py noon --force
+python modules/manual_sender.py evening --force
+python modules/manual_sender.py summary --force
 
 # Verify Telegram integration
 Check at Telegram: Should receive clean, professional English messages
@@ -942,7 +982,7 @@ Add to each news item:
   - infra/: logging (ASCII sanitizer), config, paths, http, emoji
 - Directory structure proposta
 ```
-config/modules/
+modules/
 ├── generators/
 │   ├── press_review.py
 │   ├── morning.py
@@ -994,7 +1034,7 @@ config/modules/
 ### 1) Corrupted characters in Telegram messages
 - **Symptom**: Malformed emoji like `Ã°Å¸â€œË`, `Ã¢â‚¬Â¢` in Telegram output
 - **Root cause**: Windows PowerShell encoding corruption during English localization (Nov 2025)
-- **Solution**: Use `config/modules/sv_emoji.py` with Unicode definitions instead of hardcoded emoji
+- **Solution**: Use `modules/sv_emoji.py` with Unicode definitions instead of hardcoded emoji
 - **Status**: ✅ **FULLY FIXED** - All 21 messages (Press Review, Morning, Noon, Evening, Daily Summary) 100% clean (Nov 2025)
 - **Reference**: See `DIARY.md` for complete fix patterns and methodology
 
@@ -1002,7 +1042,7 @@ config/modules/
 - **Symptom**: Strings like `â€¢`, `âœ…` in console output (NOT in Telegram)
 - **Root cause**: Windows console codepage 437 incompatible with UTF-8 emoji
 - **Impact**: Logs only - does NOT affect Telegram messages
-- **Solution (Recommended)**: Built-in ASCII-only logging sanitizer installed (`config/modules/sv_logging.py`) → converts emojis to tags (`[OK] [WARN] [ERR]`)
+- **Solution (Recommended)**: Built-in ASCII-only logging sanitizer installed (`modules/sv_logging.py`) → converts emojis to tags (`[OK] [WARN] [ERR]`)
 - **Alternative**: Set console to UTF-8: `chcp 65001; [Console]::OutputEncoding=[Text.Encoding]::UTF8; $OutputEncoding=[Text.UTF8Encoding]::new()`
 - **Status**: ✅ FIXED in logs; Telegram output remains with clean emojis
 

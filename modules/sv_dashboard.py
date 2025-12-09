@@ -17,10 +17,10 @@ import time
 
 # Import SV modules with correct paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)  # config/
-project_root = os.path.dirname(parent_dir)  # repository root
-sys.path.insert(0, parent_dir)   # Enable imports from config/ (modules package lives here)
-sys.path.insert(0, project_root)  # Add project root
+project_root = os.path.dirname(current_dir)  # repository root
+config_dir = os.path.join(project_root, "config")
+sys.path.insert(0, project_root)  # Enable imports from modules package at repo root
+sys.path.insert(0, config_dir)    # Add config for sv_paths and settings
 
 try:
     from modules.sv_news import get_sv_news_system

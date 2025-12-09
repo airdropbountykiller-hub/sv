@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 SV - System Paths Configuration
@@ -6,54 +6,78 @@ Centralized configuration dei percorsi of the system
 """
 
 import os
+from pathlib import Path
+
 
 def get_project_root():
     """Get project root directory (SV main folder)"""
     # This file is in config/, so go up one level
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
+def get_config_dir():
+    """Get config directory"""
+    return os.path.join(get_project_root(), 'config')
+
+
 def get_modules_dir():
     """Get modules directory"""
     return os.path.join(get_project_root(), 'modules')
 
+
 def get_data_dir():
     """Get data directory"""
     return os.path.join(get_project_root(), 'data')
+
 
 def get_cache_dir():
     """Get cache directory (in data/)"""
     cache_dir = os.path.join(get_data_dir(), 'cache')
     return cache_dir
 
+
 def get_news_cache_dir():
     """Get news cache directory (in data/)"""
     news_cache_dir = os.path.join(get_data_dir(), 'news_cache')
     return news_cache_dir
 
+
 def get_backups_dir():
     """Get backups directory (for flags and system state)"""
-    backups_dir = os.path.join(get_config_dir(), 'backups')
-    return backups_dir
+    return os.path.join(get_config_dir(), 'backups')
 
 
 def get_debug_previews_dir():
     """Get debug previews directory (text previews of generated content)"""
-    previews_dir = os.path.join(get_config_dir(), 'debug_previews')
-    return previews_dir
+    return os.path.join(get_config_dir(), 'debug_previews')
+
+
+def _safe_makedirs(path: str) -> Path:
+    """Create directories unless they are under the externally managed data/ root."""
+
+    target = Path(path).resolve()
+    data_root = Path(DATA_DIR).resolve()
+
+    if target == data_root or data_root in target.parents:
+        raise RuntimeError(
+            "[SV-PATHS] Refusing to auto-create data directory; provision data/ externally"
+        )
+
+    os.makedirs(target, exist_ok=True)
+    return target
+
 
 def get_reports_dir():
     """Get reports directory"""
     reports_dir = os.path.join(get_project_root(), 'reports')
-    os.makedirs(reports_dir, exist_ok=True)
+    _safe_makedirs(reports_dir)
     return reports_dir
+
 
 def get_templates_dir():
     """Get templates directory"""
     return os.path.join(get_project_root(), 'templates')
 
-def get_config_dir():
-    """Get config directory"""
-    return os.path.join(get_project_root(), 'config')
 
 # Path constants
 PROJECT_ROOT = get_project_root()
@@ -67,36 +91,33 @@ TEMPLATES_DIR = get_templates_dir()
 CONFIG_DIR = get_config_dir()
 DEBUG_PREVIEWS_DIR = get_debug_previews_dir()
 
-# Verify all directories exist
+
 def setup_all_directories():
-    """Create all necessary directories"""
+    """Create necessary non-data directories"""
     directories = [
-        DATA_DIR,
-        CACHE_DIR,
-        NEWS_CACHE_DIR,
         BACKUPS_DIR,
         REPORTS_DIR,
         TEMPLATES_DIR,
         CONFIG_DIR,
-        DEBUG_PREVIEWS_DIR
+        DEBUG_PREVIEWS_DIR,
     ]
 
     for directory in directories:
-        os.makedirs(directory, exist_ok=True)
-    
-    print(f"âœ… [SV-PATHS] All directories verified/created")
+        _safe_makedirs(directory)
+
+    print("✅ [SV-PATHS] Directories verified (data/ remains external and untouched)")
     return True
 
-if __name__ == '__main__':
-    print("ðŸ”§ [SV-PATHS] Path System Configuration")
-    print(f"ðŸ“ Project Root: {PROJECT_ROOT}")
-    print(f"ðŸ“ Modules: {MODULES_DIR}")
-    print(f"ðŸ“ Data: {DATA_DIR}")
-    print(f"ðŸ“ Cache: {CACHE_DIR}")
-    print(f"ðŸ“ News Cache: {NEWS_CACHE_DIR}")
-    print(f"📁 Backups: {BACKUPS_DIR}")
-    print(f"ðŸ“ Reports: {REPORTS_DIR}")
-    print(f"ðŸ“ Templates: {TEMPLATES_DIR}")
-    print(f"ðŸ“ Config: {CONFIG_DIR}")
-    setup_all_directories()
 
+if __name__ == '__main__':
+    print("🛠 [SV-PATHS] Path System Configuration")
+    print(f"📂 Project Root: {PROJECT_ROOT}")
+    print(f"📂 Modules: {MODULES_DIR}")
+    print(f"📂 Data (external): {DATA_DIR}")
+    print(f"📂 Cache (depends on data): {CACHE_DIR}")
+    print(f"📂 News Cache (depends on data): {NEWS_CACHE_DIR}")
+    print(f"📁 Backups: {BACKUPS_DIR}")
+    print(f"📂 Reports: {REPORTS_DIR}")
+    print(f"📂 Templates: {TEMPLATES_DIR}")
+    print(f"📂 Config: {CONFIG_DIR}")
+    setup_all_directories()

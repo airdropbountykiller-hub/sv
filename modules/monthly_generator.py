@@ -14,9 +14,9 @@ from typing import Dict, List, Optional, Any
 import logging
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, 'modules'))
+sys.path.append(os.path.join(project_root, 'config', 'modules'))
 
 log = logging.getLogger(__name__)
 

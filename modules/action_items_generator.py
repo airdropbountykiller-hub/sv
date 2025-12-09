@@ -18,7 +18,7 @@ class ActionItemsGenerator:
     """Generate actionable tasks based on comprehensive analytics"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         
         # Priority scoring weights
         self.priority_weights = {

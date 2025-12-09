@@ -582,7 +582,7 @@ reports/                 ← System outputs by priority
   ├── 3_monthly/         ← Third level
   ├── 8_daily_content/   ← Content backups
   └── 9_telegram_history/ ← Message delivery logs
-data/                    ← Technical cache (auto-recreated)
+data/                    ← External runtime cache (not auto-created)
 temp_tests/              ← Development & testing area
 ```
 
@@ -590,14 +590,14 @@ temp_tests/              ← Development & testing area
 
 #### **🏭 `data/` = TECHNICAL INFRASTRUCTURE**
 ```
-data/
+data/ (external, not tracked)
 ├── cache/              ← Performance cache
 ├── news_cache/         ← RSS feed cache
 ├── csv_signals/        ← Raw trading signals
 ├── ml_predictions/     ← ML model outputs
 └── market_data/        ← Live market feeds
 ```
-**Philosophy**: *"If deleted, system recreates automatically"*
+**Philosophy**: *"Provision externally; system will not auto-create or track it"*
 
 #### **🧠 `config/backups/` = BUSINESS DATA AND OPERATIONAL MEMORY**
 ```

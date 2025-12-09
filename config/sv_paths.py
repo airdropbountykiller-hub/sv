@@ -6,6 +6,7 @@ Centralized configuration dei percorsi of the system
 """
 
 import os
+from pathlib import Path
 
 
 def get_project_root():
@@ -51,10 +52,25 @@ def get_debug_previews_dir():
     return os.path.join(get_config_dir(), 'debug_previews')
 
 
+def _safe_makedirs(path: str) -> Path:
+    """Create directories unless they are under the externally managed data/ root."""
+
+    target = Path(path).resolve()
+    data_root = Path(DATA_DIR).resolve()
+
+    if target == data_root or data_root in target.parents:
+        raise RuntimeError(
+            "[SV-PATHS] Refusing to auto-create data directory; provision data/ externally"
+        )
+
+    os.makedirs(target, exist_ok=True)
+    return target
+
+
 def get_reports_dir():
     """Get reports directory"""
     reports_dir = os.path.join(get_project_root(), 'reports')
-    os.makedirs(reports_dir, exist_ok=True)
+    _safe_makedirs(reports_dir)
     return reports_dir
 
 
@@ -76,8 +92,6 @@ CONFIG_DIR = get_config_dir()
 DEBUG_PREVIEWS_DIR = get_debug_previews_dir()
 
 
-# Verify all directories exist
-
 def setup_all_directories():
     """Create necessary non-data directories"""
     directories = [
@@ -89,9 +103,9 @@ def setup_all_directories():
     ]
 
     for directory in directories:
-        os.makedirs(directory, exist_ok=True)
+        _safe_makedirs(directory)
 
-    print("✅ [SV-PATHS] Directories verified (data creation skipped)")
+    print("✅ [SV-PATHS] Directories verified (data/ remains external and untouched)")
     return True
 
 

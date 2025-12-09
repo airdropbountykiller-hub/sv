@@ -18,7 +18,7 @@ class SVRiskAnalyzer:
     """Advanced risk analysis for SV trading predictions"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.daily_metrics_dir = os.path.join(self.project_root, 'reports', 'metrics')
     
     def calculate_prediction_var(self, daily_data: Dict, confidence_level: float = 0.95) -> Dict[str, Any]:

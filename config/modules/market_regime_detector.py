@@ -19,7 +19,7 @@ class MarketRegimeDetector:
     """Detect and analyze market regimes from daily data"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         
         # Regime classification thresholds
         self.volatility_thresholds = {

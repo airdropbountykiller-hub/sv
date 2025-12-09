@@ -154,7 +154,7 @@ class SVNewsSystem:
     def setup_news_cache(self):
         """Setup news caching system - now correctly in data/news_cache"""
         # From modules/ directory, go up to project root
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.cache_dir = os.path.join(project_root, 'data', 'news_cache')
         os.makedirs(self.cache_dir, exist_ok=True)
         

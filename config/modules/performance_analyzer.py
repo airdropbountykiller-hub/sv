@@ -18,7 +18,7 @@ class PerformanceAttributionAnalyzer:
     """Analyze performance attribution across multiple dimensions"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     def analyze_by_asset(self, daily_data: Dict) -> Dict[str, Any]:
         """Analyze performance by individual asset"""

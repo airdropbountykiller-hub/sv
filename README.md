@@ -19,7 +19,7 @@
 2. **Offers web dashboard** for real-time monitoring of event calendar and financial news
 
 ### 📂 Repository layout (where things live)
-- `modules/`: core runtime package
+- `modules/`: core runtime package (stays at repo root, not inside `config/`)
 - `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
   - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
   - `config/debug_previews/`: plain-text previews generated for manual inspection
@@ -27,34 +27,7 @@
   - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
   - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
 - `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary tests/parking files that should not ship with production runners
-- `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `config/`.
-- Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
-
-> ℹ️ **Working in this repo:** the assistant can edit files and create commits in the local clone available in this workspace. Publishing to GitHub still depends on your remote credentials/workflow (push or PR on the upstream repository).
-
-#### 🔼 Come caricare le modifiche su GitHub
-- Verifica/aggiungi il remote con le tue credenziali: `git remote -v` (oppure `git remote add origin <URL_REPO>`).
-- Esegui i commit localmente (`git status`, `git add ...`, `git commit -m "..."`).
-- Pubblica con `git push origin <branch>` oppure apri una Pull Request dal tuo fork/branch remoto.
-- Se usi credenziali SSH/HTTPS, assicurati che l'ambiente locale abbia i token/chiavi configurati (non vengono gestiti automaticamente dall'assistente).
-
-#### 🩹 Se vedi conflitti di merge
-- Assicurati di avere l'ultimo stato remoto: `git fetch origin` (o il nome del tuo remote).
-- Allinea il branch: `git pull --rebase origin <branch>` e lascia che Git evidenzi i file in conflitto.
-- Per `DIARY.md` ora è impostato `merge=union` in `.gitattributes`, quindi Git dovrebbe unire automaticamente le sezioni senza conflitti. Se dovesse comunque comparire come conflicted, esegui `bash config/resolve_diary_conflict.sh` per forzare la risoluzione e marcarlo come risolto.
-- Apri i file con marker `<<<<<<<`, `=======`, `>>>>>>>` e mantieni solo la versione corretta (tipicamente quella che sposta script/tools dentro `temp_tests/` e i backup/debug in `config/`).
-- Una volta risolto, marca i file come risolti (`git add <file>...`), poi continua il rebase con `git rebase --continue` (o fai un commit se non stai rebasing).
-- Verifica con `git status` che non ci siano altri conflitti e rilancia i comandi di push/PR.
-
-### 📂 Repository layout (where things live)
-- `modules/`: core runtime package
-- `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
-  - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
-  - `config/debug_previews/`: plain-text previews generated for manual inspection
-  - `config/send_telegram_reports.py`: entry point to push saved JSON reports to Telegram (`python config/send_telegram_reports.py ...`)
-  - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
-  - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
-- `temp_tests/`: sandbox for exploratory checks, previews, mock data, and temporary tests/parking files that should not ship with production runners
+- `data/`: runtime-only; auto-created by the dashboard when missing and kept out of version control
 - `scripts/` and `tools/` (top-level): **no longer used**; any helpers belong under `config/`.
 - Documentation is centralized in this root `README.md` (no additional README files under `temp_tests/`).
 
@@ -76,10 +49,10 @@
 
 ### 🌍 **COMPLETE ENGLISH SYSTEM + TELEGRAM INTEGRATION (v1.4.0)**
 
-✅ **Full English System**: Zero Italian terms remaining - complete professional English localization  
-✅ **Telegram Message System**: All 5 content types fully operational with clean delivery  
-✅ **Manual Control System**: Complete dual system - automated triggers + manual sending  
-✅ **Message Architecture**: Multi-message structure respecting Telegram limits  
+✅ **Full English System**: Zero Italian terms remaining - complete professional English localization
+✅ **Telegram Message System**: All 5 content types fully operational with clean delivery
+✅ **Manual Control System**: Complete dual system - automated triggers + manual sending
+✅ **Message Architecture**: Multi-message structure respecting Telegram limits
 ✅ **Clean Output**: ASCII-safe messages with professional headers and formatting
 
 > **📝 ACHIEVEMENT**: System is now **FULLY OPERATIONAL** with complete English localization and working Telegram integration.
@@ -91,32 +64,6 @@
 - **Clean Headers**: Fixed "Generic" issue - now shows correct content types (Press Review, Morning Report, etc.)
 - **Emoji Safety**: Replaced problematic Unicode with ASCII-safe tags `[PR] [AM] [NOON] [PM] [SUM]`
 - **Dual System**: Automated scheduling + manual override with `--force` and `--preview` options
-
----
-
-## 🆕 Recent Enhancements (Nov 19–22, 2025)
-
-### 📅 Short‑term plan
-- Fino a Lunedì 24 Nov: focus sul WEEKLY (contenuti + grafici data‑driven)
-- Martedì 25 Nov: ripresa lavori sul MONTHLY (asset focus, next month focus, dashboard)
-**Latest: Weekly PDF Pro layout + Charts + Data‑Driven Content (v1.5.0)**
-- Executive Summary con Best/Worst day reali, Highlights, sezione "What worked / What didn’t" e Focus Assets
-- Grafici integrati: Daily Accuracy Trend (con overlay di trend), Asset Performance, Risk Metrics, Weekly Dashboard
-- Raccomandazioni ripulite e 0 numeri inventati (sezioni/grafici nascosti se dati assenti)
-
-Previous: Dynamic BTC Levels, Honest Accuracy, Intraday News Engine & Macro Cleanup (v1.4.4)
-
-## 🚀 **PLANNED ENHANCEMENTS (v1.5.0 - Nov 22, 2025)**
-**Next Phase: Narrative Coherence, Multi-Asset Completion & Architecture Enhancement**
-
-### **🎯 FASE 1: Quick Wins (Week 1-2)**
-#### **1.1 Regime Manager Integration** ✅
-- **Status**: Implemented `modules/regime_manager.py` for unified sentiment and regime management
-- **Objective**: Eliminate narrative contradictions between Evening ("risk-off") and Summary ("risk-on")
-- **Features**: Dynamic session character, market momentum, risk assessment based on real accuracy
-- **Test Result**: ✅ Coherence score 75% with 0% accuracy (Grade D) → "Risk-off rotation - defensive positioning"
-
-#### **1.2 Complete Multi-Asset Data Integration** 🔄
 - **SPX Dynamic Levels**: Replace static 5400/5430/5375 with live `^GSPC` calculations
 - **EUR/USD Real-Time**: Replace static 1.085/1.075/1.09 with live EURUSD quotes
 - **Gold XAUUSD Integration**: Complete Gold data-driven approach with `XAUUSD=X` feed
@@ -149,6 +96,28 @@ Previous: Dynamic BTC Levels, Honest Accuracy, Intraday News Engine & Macro Clea
 - **P&L Tracking**: Connect to real portfolio for authentic Sharpe/drawdown metrics
 - **Risk Analytics**: Replace N/A values with calculated risk metrics
 - **Performance Attribution**: Sector and asset-level contribution analysis
+
+### 🔌 Portfolio manager integration (broker-aware)
+The `modules/portfolio_manager.py` class already stores broker-specific limits and cluster rules. To wire it into the runtime:
+
+1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/backups/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
+2. **Feed data**: reuse existing market sources (`modules/engine/market_data.get_market_snapshot` for BTC/SPX/EURUSD/Gold, `get_live_equity_fx_quotes` for other tickers) and pass live quotes into `update_positions`.
+3. **Route signals**: send ML prediction cards (asset/entry/stop/target/confidence/broker) to `open_position`. Automated brokers (`IG`, `BYBIT_BTC`, `BYBIT_USDT`) accept bot trades; discretionary ones (`DIRECTA`, `TRADE_REPUBLIC`) can be surfaced to a UI/advisor queue when `auto_trading=False`.
+4. **Risk guardrails**: sizing uses per-broker risk caps; `open_position` enforces max open trades, per-asset limits and cluster exposure before booking a position.
+5. **Expose output**: dashboards/APIs can read `get_portfolio_snapshot()`, while configuration/help panels can call `describe_configuration()` or `integration_overview()` for a quick summary of broker strategies and wiring.
+
+> Quick check: run `python temp_tests/portfolio_manager_smoke.py` to execute a broker-aware open/update/close cycle against a temporary portfolio file (no production state touched).
+
+### 🔌 Portfolio manager integration (broker-aware)
+The `modules/portfolio_manager.py` class already stores broker-specific limits and cluster rules. To wire it into the runtime:
+
+1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/backups/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
+2. **Feed data**: reuse existing market sources (`modules/engine/market_data.get_market_snapshot` for BTC/SPX/EURUSD/Gold, `get_live_equity_fx_quotes` for other tickers) and pass live quotes into `update_positions`.
+3. **Route signals**: send ML prediction cards (asset/entry/stop/target/confidence/broker) to `open_position`. Automated brokers (`IG`, `BYBIT_BTC`, `BYBIT_USDT`) accept bot trades; discretionary ones (`DIRECTA`, `TRADE_REPUBLIC`) can be surfaced to a UI/advisor queue when `auto_trading=False`.
+4. **Risk guardrails**: sizing uses per-broker risk caps; `open_position` enforces max open trades, per-asset limits and cluster exposure before booking a position.
+5. **Expose output**: dashboards/APIs can read `get_portfolio_snapshot()`, while configuration/help panels can call `describe_configuration()` or `integration_overview()` for a quick summary of broker strategies and wiring.
+
+> Quick check: run `python temp_tests/portfolio_manager_smoke.py` to execute a broker-aware open/update/close cycle against a temporary portfolio file (no production state touched).
 
 #### **3.2 ML Model Enhancement**
 - **Target**: Accuracy improvement 70% → 85% within 6 months

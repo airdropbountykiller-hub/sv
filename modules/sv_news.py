@@ -156,8 +156,15 @@ class SVNewsSystem:
         # From modules/ directory, go up to project root
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.cache_dir = os.path.join(project_root, 'data', 'news_cache')
-        os.makedirs(self.cache_dir, exist_ok=True)
-        
+
+        if os.path.isdir(self.cache_dir):
+            log.info("[SV-NEWS] Using existing news cache directory")
+        else:
+            # Do not create the directory automatically; it must be provisioned externally
+            log.warning(
+                "[SV-NEWS] News cache directory missing; caching remains disabled until 'data/news_cache' exists"
+            )
+
         # NOTE: attualmente non usato dal flusso intraday; previsto per futuri
         # meccanismi di tracking/cache (rate limiting, deduplicazione, ecc.).
         self.news_tracking_file = os.path.join(self.cache_dir, 'news_tracking.json')

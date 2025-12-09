@@ -531,6 +531,37 @@ class SVPortfolioManager:
             'asset_clusters': self.asset_clusters,
             'brokers': brokers,
         }
+
+    def integration_overview(self) -> Dict[str, Any]:
+        """Describe how the portfolio manager plugs into the runtime pipeline.
+
+        This is meant to be consumed by orchestration/reporting code so the
+        integration stays declarative (what feeds/signals/outputs are expected).
+        """
+
+        return {
+            'inputs': {
+                'market_snapshot': 'modules.engine.market_data.get_market_snapshot(now) for BTC/SPX/EURUSD/Gold',
+                'live_quotes': 'modules.engine.market_data.get_live_equity_fx_quotes for tickers referenced by signals',
+                'signals': 'modules.brain prediction cards with asset/entry/stop/target/confidence/broker',
+            },
+            'routing': {
+                'automated_brokers': ['IG', 'BYBIT_BTC', 'BYBIT_USDT'],
+                'discretionary_brokers': ['DIRECTA', 'TRADE_REPUBLIC'],
+                'gate': 'call open_position only when broker auto_trading=True; otherwise surface to UI/advisor queue',
+            },
+            'risk_checks': [
+                'per-broker caps (max_open_trades, max_trades_per_asset, cluster_limits)',
+                'sizing via calculate_position_size using broker risk_per_trade and max_position_size',
+                'available_cash guardrails updated per broker account',
+            ],
+            'outputs': {
+                'state': self.portfolio_file,
+                'snapshot': 'get_portfolio_snapshot for dashboards/telemetry',
+                'history': self.history_dir,
+                'configuration': 'describe_configuration and integration_overview for UI/help panels',
+            },
+        }
     
     def save_daily_snapshot(self):
         """Save daily portfolio snapshot for historical tracking.

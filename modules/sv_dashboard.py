@@ -875,11 +875,10 @@ def check_dependencies():
 
 def setup_directories():
     """Setup required directories"""
-    directories = [TEMPLATES_DIR, DATA_DIR]
-    for directory in directories:
-        if not os.path.exists(directory):
-            logger.info(f"Creating directory: {directory}")
-            os.makedirs(directory, exist_ok=True)
+    # Only create runtime data directory; templates are now stored under <repo>/templates
+    if not os.path.exists(DATA_DIR):
+        logger.info(f"Creating directory: {DATA_DIR}")
+        os.makedirs(DATA_DIR, exist_ok=True)
 
 def open_browser():
     """Open browser after a short delay (only in main process)"""

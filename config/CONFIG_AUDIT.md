@@ -1,11 +1,11 @@
 # Config audit (duplicates, obsolete, unused)
 
-## Archival snapshots still present
-- `config/daily_generator_20251122.py` and `config/daily_generator_20251123_before_modularization.py` remain as historical references; runtime code never imports them, so they are safe to keep as archives or remove to reduce clutter.【F:config/daily_generator_20251122.py†L1-L640】【F:config/daily_generator_20251123_before_modularization.py†L1-L647】【F:DIARY.md†L406-L552】
+## Archival snapshots removed
+- The legacy daily generator backups from November 2025 were deleted during the latest cleanup; runtime continues to rely only on `modules/daily_generator.py`. The audit remains to document their prior existence in case they need to be restored from history.【F:DIARY.md†L400-L554】
 
 ## Stale or unused configs
 - `config/performance_config.py` defines performance tuning settings but is not imported anywhere aside from a README mention, so it is currently dormant.【F:config/performance_config.py†L1-L87】【F:README.md†L538-L559】
-- `config/daily_session.json` is only referenced in docs; there is no runtime reader (imports still point to a missing `daily_session_tracker` module), leaving this state file unused.【F:config/daily_generator_20251122.py†L90-L91】【F:modules/daily_generator.py†L48-L52】【F:README.md†L538-L559】
+- `config/daily_session.json` is only referenced in docs; there is no runtime reader (imports still point to a missing `daily_session_tracker` module), leaving this state file unused.【F:modules/daily_generator.py†L48-L52】【F:README.md†L538-L559】
 
 ## Active config locations (verified)
 - Daily contexts and ML coherence outputs now load directly from `config/daily_contexts/` and `config/ml_analysis/` instead of the old `backups/` indirection.【F:modules/coherence_manager.py†L12-L22】【F:modules/daily_generator.py†L392-L415】

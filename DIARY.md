@@ -404,15 +404,8 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 - `config/send_telegram_reports.py` – richiamato da `SV_Start.bat` per inviare report JSON già salvati a Telegram; strumento operativo non di core.
   - `temp_tests/*.py` – script di test/preview (`preview_full_day.py`, `generate_weekly.py`, `generate_monthly.py`, test qualità news, ecc.); non importati dai moduli di produzione.
 
-- **Legacy / Backup (CANDIDATO ARCHIVIAZIONE)**
-  - `config/backups/daily_generator_20251122.py`:
-    - backup storico di `daily_generator.py` prima del refactor del 22/11,
-    - spostato fuori da `modules/` per evitare confusione con il codice attivo.
-
-- **Nuovo backup di sicurezza (23 Nov, pre‑modularizzazione)**
-  - `config/backups/daily_generator_20251123_before_modularization.py`:
-    - snapshot completo dell’attuale `modules/daily_generator.py` **prima** di iniziare la modularizzazione Engine/Brain,
-    - riferimento immediato per eventuale rollback locale.
+- **Legacy / Backup (RIMOSSI)**
+  - I backup storici `config/backups/daily_generator_20251122.py` e `config/backups/daily_generator_20251123_before_modularization.py` sono stati eliminati manualmente; l’unico generatore attivo resta `modules/daily_generator.py`.
 
 ### Verifica preview post‑modifiche (23 Nov, `preview_full_day.py`)
 

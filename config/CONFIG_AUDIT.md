@@ -1,7 +1,7 @@
 # Config audit (duplicates, obsolete, unused)
 
-## Legacy backups left in `config/`
-- `config/daily_generator_20251122.py` and `config/daily_generator_20251123_before_modularization.py` are still present as historical snapshots; the only references come from documentation notes, not runtime code, so they appear to be safe-to-remove backups.【f7b6e3†L27-L28】【df9951†L1-L4】【3399e7†L1-L4】
+## Archival snapshots removed
+- The legacy daily generator backups from November 2025 were deleted during the latest cleanup; runtime continues to rely only on `modules/daily_generator.py`. The audit remains to document their prior existence in case they need to be restored from history.【F:DIARY.md†L400-L554】
 
 ## Misplaced runtime data (currently ignored)
 - Daily contexts and ML coherence outputs now align with their on-disk paths (`config/daily_contexts/` and `config/ml_analysis/`), removing the stale `config/backups/...` indirection that previously left them unused.【f7b6e3†L4-L55】【F:modules/coherence_manager.py†L12-L17】【F:modules/daily_generator.py†L392-L415】【25aee7†L1-L2】

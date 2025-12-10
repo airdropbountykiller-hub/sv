@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Generate full-day previews for SV system (Press → Morning → Noon → Evening → Summary).
 
-Outputs plain-text previews under config/debug_previews/ so we can manually inspect
+Outputs plain-text previews under config/previews/ so we can manually inspect
 coerenza narrativa, categorie news e tono ML senza toccare Telegram.
 """
 
@@ -26,7 +26,7 @@ from modules.daily_generator import (
 
 
 def ensure_preview_dir() -> Path:
-    preview_dir = Path(sv_paths.DEBUG_PREVIEWS_DIR)
+    preview_dir = Path(sv_paths.PREVIEWS_DIR)
     preview_dir.mkdir(parents=True, exist_ok=True)
     return preview_dir
 

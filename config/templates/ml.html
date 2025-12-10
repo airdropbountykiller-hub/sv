@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SV - Daily Signals Results</title>
+  <style>
+    body{font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f1419;color:#e6e6e6;margin:0}
+    .header{background:linear-gradient(135deg,#1a1f2e 0%,#2d3748 100%);border-bottom:2px solid #4fd1c7;padding:1rem 1.5rem;position:sticky;top:0;z-index:10}
+    .header-content{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+    .nav a{color:#a0aec0;text-decoration:none;margin-left:1rem;padding:.4rem .8rem;border:1px solid #4a5568;border-radius:8px}
+    .nav a:hover{color:#4fd1c7;border-color:#4fd1c7}
+    .nav a.active{background:linear-gradient(135deg,#4fd1c7 0%,#38b2ac 100%);color:#1a1f2e;border-color:#4fd1c7}
+    .container{max-width:1200px;margin:0 auto;padding:1.5rem}
+    .section{background:linear-gradient(135deg,#1a1f2e 0%,#0f1419 100%);border:1px solid #2d3748;border-radius:12px;margin-bottom:1.5rem}
+    .section h3{margin:0;padding:1rem 1.2rem;border-bottom:1px solid #2d3748;color:#4fd1c7}
+    .section .content{padding:1rem 1.2rem}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #2d3748;padding:.6rem .5rem;text-align:left}
+    th{color:#a0aec0;font-weight:600}
+    .badge{display:inline-block;padding:.2rem .5rem;border-radius:6px;font-size:.8rem;border:1px solid #4fd1c7;color:#4fd1c7}
+    .stat{display:inline-block;margin-right:1rem;color:#a0aec0}
+    .grid-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+    .tile{background:linear-gradient(135deg,#1a1f2e 0%,#0f1419 100%);border:1px solid #2d3748;border-radius:12px;padding:.9rem}
+    .tile-title{font-weight:600;margin-bottom:.5rem;color:#e6e6e6}
+    .tile-line{color:#a0aec0;margin:.25rem 0}
+    .up{color:#48bb78}
+    .down{color:#f56565}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <h2>🤖 SV - Daily Signals Results</h2>
+      <div class="nav">
+        <a href="/">Dashboard</a>
+        <a href="/calendario">Calendar</a>
+        <a href="/news">News</a>
+        <a href="/ml" class="active">Daily Signals</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section">
+      <h3>Overview</h3>
+      <div class="content">
+        <span class="stat">Predictions Today: <span id="pred-count">--</span></span>
+        <span class="stat">Overall Accuracy: <span id="overall-acc">--</span>%</span>
+        <span class="stat">Assets: <span id="assets-count">--</span></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Key Assets</h3>
+      <div class="content">
+        <div class="grid-tiles">
+          <div class="tile" id="tile-btc"><div class="tile-title">BTC</div><div class="tile-line">Loading...</div></div>
+          <div class="tile" id="tile-gold"><div class="tile-title">GOLD</div><div class="tile-line">Loading...</div></div>
+          <div class="tile" id="tile-spx"><div class="tile-title">SP500</div><div class="tile-line">Loading...</div></div>
+          <div class="tile" id="tile-eurusd"><div class="tile-title">EUR/USD</div><div class="tile-line">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Daily Verification</h3>
+      <div class="content">
+        <div id="verify-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Dir</th>
+                <th>Entry</th>
+                <th>Target</th>
+                <th>Stop</th>
+                <th>Live</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>R:R</th>
+              </tr>
+            </thead>
+            <tbody id="verify-rows"><tr><td colspan="9">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Signals Results by Asset</h3>
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Total</th>
+              <th>Hits</th>
+              <th>Misses</th>
+              <th>Pending</th>
+              <th>Hit Rate</th>
+            </tr>
+          </thead>
+          <tbody id="asset-summary-rows"><tr><td colspan="6">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Live Predictions Status</h3>
+      <div class="content">
+        <div id="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Dir</th>
+                <th>Entry</th>
+                <th>Target</th>
+                <th>Stop</th>
+                <th>Live</th>
+                <th>Accuracy</th>
+                <th>Status</th>
+                <th>R:R</th>
+              </tr>
+            </thead>
+            <tbody id="rows"><tr><td colspan="9">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ASSET_ALIASES = {
+      BTC: ['BTC','XBT','BTCUSD','BTC-USD'],
+      GOLD: ['GOLD','XAUUSD','XAU','GC','GOLDUSD'],
+      SPX: ['SPX','S&P500','SP500','^GSPC'],
+      EURUSD: ['EURUSD','EUR/USD','EURUSD=X','EUR-USD']
+    };
+    function matchesAsset(name, aliases){ if(!name) return false; const n=String(name).toUpperCase(); return aliases.some(a=>n===String(a).toUpperCase()); }
+    function selectBest(arr){ if(!arr||!arr.length) return null; return arr.slice().sort((a,b)=> (b.confidence||0)-(a.confidence||0))[0]; }
+    function fmtNum(x){ if(x===null||x===undefined||x==='') return '-'; const n=Number(x); if(!isFinite(n)) return String(x); return Math.abs(n)>=100 ? n.toFixed(0) : (Math.abs(n)>=10 ? n.toFixed(2) : n.toFixed(4)); }
+    function renderTile(elId, label, pred, price, changePct){
+      const el = document.getElementById(elId); if(!el) return;
+      const chgClass = (Number(changePct||0) >= 0) ? 'up':'down';
+      const dir = pred?.direction || '-';
+      const live = (price ?? pred?.current_price) ?? '-';
+      const acc = (pred && pred.accuracy!=null) ? `${Number(pred.accuracy).toFixed(1)}%` : '--';
+      const e = pred?.entry ?? '-';
+      const t = pred?.target ?? '-';
+      const s = pred?.stop ?? '-';
+      const status = pred?.status || '';
+      el.innerHTML = `<div class="tile-title">${label}</div>
+        <div class="tile-line">Price: <span class="${chgClass}">${fmtNum(live)}${(changePct!=null)?` (${Number(changePct).toFixed(2)}%)`:''}</span></div>
+        <div class="tile-line">Dir: ${dir} • Acc: ${acc}</div>
+        <div class="tile-line">E/T/S: ${fmtNum(e)} / ${fmtNum(t)} / ${fmtNum(s)}</div>
+        ${status?`<div class=\"tile-line\">Status: ${status}</div>`:''}`;
+    }
+    async function loadData(){
+      try{
+        const [r1, r2, r3] = await Promise.all([
+          fetch('/api/ml'),
+          fetch('/api/ml/daily_verification'),
+          fetch('/api/ml/asset_results')
+        ]);
+        const d = await r1.json();
+        const v = await r2.json();
+        const a = await r3.json();
+        const preds = d.live_predictions || [];
+        document.getElementById('pred-count').textContent = d.predictions_active ?? d.predictions_made ?? preds.length ?? '--';
+        document.getElementById('overall-acc').textContent = d.overall_accuracy ?? '--';
+        document.getElementById('assets-count').textContent = d.assets_tracked ?? '--';
+
+        // Verification table (explicit Hit/Miss/Pending)
+        const vrows = (v.items||[]).map(p=>{
+          const rr = (p.risk_reward||0).toFixed(2);
+          return `<tr>
+            <td>${p.asset}</td>
+            <td>${p.direction}</td>
+            <td>${p.entry}</td>
+            <td>${p.target}</td>
+            <td>${p.stop}</td>
+            <td>${p.current_price||'-'}</td>
+            <td>${p.status}</td>
+            <td>${p.progress_pct!=null? p.progress_pct+'%':'-'}</td>
+            <td>${rr}</td>
+          </tr>`;
+        }).join('');
+        document.getElementById('verify-rows').innerHTML = vrows || '<tr><td colspan="9">No predictions found</td></tr>';
+
+        // Asset summary (signals results by asset)
+        const assets = a.assets || {};
+        const arows = Object.keys(assets).sort().map(k=>{
+          const c = assets[k].counts;
+          const hr = (assets[k].hit_rate!=null? assets[k].hit_rate.toFixed? assets[k].hit_rate.toFixed(1):assets[k].hit_rate : 0);
+          return `<tr>
+            <td>${k}</td>
+            <td>${c.total}</td>
+            <td>${c.hits}</td>
+            <td>${c.misses}</td>
+            <td>${c.pending}</td>
+            <td>${hr}%</td>
+          </tr>`;
+        }).join('');
+        document.getElementById('asset-summary-rows').innerHTML = arows || '<tr><td colspan="6">No asset results</td></tr>';
+
+        // Table (all predictions)
+        const rows = preds.map(p=>{
+          const rr = (p.risk_reward||0).toFixed(2);
+          return `<tr>
+            <td>${p.asset}</td>
+            <td>${p.direction}</td>
+            <td>${p.entry}</td>
+            <td>${p.target}</td>
+            <td>${p.stop}</td>
+            <td>${p.current_price||'-'}</td>
+            <td>${(p.accuracy??0).toFixed(1)}%</td>
+            <td>${p.status}</td>
+            <td>${rr}</td>
+          </tr>`;
+        }).join('');
+        document.getElementById('rows').innerHTML = rows || '<tr><td colspan="9">No predictions found</td></tr>';
+
+        // Tiles (key assets)
+        const pick = aliases => selectBest(preds.filter(p=>matchesAsset(p.asset, aliases)));
+        const ps = d.price_summary || {};
+        const btcPred = pick(ASSET_ALIASES.BTC);
+        const spxPred = pick(ASSET_ALIASES.SPX);
+        const eurPred = pick(ASSET_ALIASES.EURUSD);
+        const goldPred = pick(ASSET_ALIASES.GOLD);
+
+        renderTile('tile-btc','BTC', btcPred, (ps.BTC?.price ?? btcPred?.current_price ?? null), ps.BTC?.change_24h ?? null);
+        renderTile('tile-spx','SP500', spxPred, spxPred?.current_price ?? null, null);
+        renderTile('tile-eurusd','EUR/USD', eurPred, eurPred?.current_price ?? null, null);
+        renderTile('tile-gold','GOLD', goldPred, goldPred?.current_price ?? null, null);
+      }catch(e){
+        document.getElementById('rows').innerHTML = `<tr><td colspan="9">Error: ${e}</td></tr>`;
+        document.getElementById('verify-rows').innerHTML = `<tr><td colspan="9">Error: ${e}</td></tr>`;
+        document.getElementById('asset-summary-rows').innerHTML = `<tr><td colspan="6">Error: ${e}</td></tr>`;
+      }
+    }
+    loadData();
+    setInterval(loadData, 60000);
+  </script>
+</body>
+</html>

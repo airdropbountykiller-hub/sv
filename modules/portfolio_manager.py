@@ -20,7 +20,7 @@ class SVPortfolioManager:
 
     def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
         self.base_dir = base_dir
-        self.portfolio_file = portfolio_file or os.path.join(sv_paths.BACKUPS_DIR, 'portfolio_state.json')
+        self.portfolio_file = portfolio_file or sv_paths.PORTFOLIO_STATE_FILE
         self.history_dir = history_dir or os.path.join(base_dir, 'reports', 'portfolio_history')
 
         self.asset_clusters = {

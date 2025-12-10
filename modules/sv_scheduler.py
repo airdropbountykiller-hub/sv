@@ -66,7 +66,7 @@ class SVScheduler:
             "CLOSED": {"priority": "low", "frequency_modifier": 0.6}
         }
         
-        self.flags_file = os.path.join(sv_paths.BACKUPS_DIR, 'sv_flags.json')
+        self.flags_file = sv_paths.FLAGS_FILE
         self.flags = {
             "press_review_sent": False,
             "morning_sent": False,
@@ -85,16 +85,20 @@ class SVScheduler:
         
     def ensure_directories(self):
         """Create necessary directories"""
-        directories = [
-            sv_paths.BACKUPS_DIR,
+        try:
+            sv_paths.setup_all_directories()
+        except Exception as e:
+            log.error(f"Error preparing config directories: {e}")
+
+        report_dirs = [
             os.path.join(project_root, 'reports', '1_daily'),
             os.path.join(project_root, 'reports', '2_weekly'),
             os.path.join(project_root, 'reports', '3_monthly'),
             os.path.join(project_root, 'reports', '4_quarterly'),
             os.path.join(project_root, 'reports', '5_semestral')
         ]
-        
-        for directory in directories:
+
+        for directory in report_dirs:
             try:
                 os.makedirs(directory, exist_ok=True)
             except Exception as e:

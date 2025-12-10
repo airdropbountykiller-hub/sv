@@ -3106,9 +3106,19 @@ class DailyContentGenerator:
                         continuity = get_narrative_continuity()
                         rassegna_connection = continuity.get_morning_rassegna_connection()
                         
-                        msg1_parts.append(f"{EMOJI['bullet']} {rassegna_connection.get('rassegna_followup', f'{EMOJI["news"]} Press review sync in progress')}")
-                        msg1_parts.append(f"{EMOJI['bullet']} {rassegna_connection.get('sector_continuation', f'{EMOJI["target"]} Multi-sector momentum tracking')}")
-                        msg1_parts.append(f"{EMOJI['bullet']} {rassegna_connection.get('risk_update', f'{EMOJI["shield"]} Risk theme: Balanced - ML confirmation')}")
+                        press_review_fallback = f"{EMOJI['news']} Press review sync in progress"
+                        sector_fallback = f"{EMOJI['target']} Multi-sector momentum tracking"
+                        risk_fallback = f"{EMOJI['shield']} Risk theme: Balanced - ML confirmation"
+
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {rassegna_connection.get('rassegna_followup', press_review_fallback)}"
+                        )
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {rassegna_connection.get('sector_continuation', sector_fallback)}"
+                        )
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {rassegna_connection.get('risk_update', risk_fallback)}"
+                        )
                         
                     else:
                         # Fallback continuity
@@ -3299,8 +3309,18 @@ class DailyContentGenerator:
                         trend_direction = f"{EMOJI['chart_up']} BULLISH" if change_pct > 1 else f"{EMOJI['chart_down']} BEARISH" if change_pct < -1 else f"{EMOJI['right_arrow']} SIDEWAYS"
                         momentum = min(abs(change_pct) * 2, 10)
                         
-                        msg1_parts.append(f"{EMOJI['bullet']} *BTC Live*: ${price:,.0f} ({change_pct:+.1f}%) {trend_direction}")
-                        msg1_parts.append(f"{EMOJI['bullet']} *Momentum Score*: {momentum:.1f}/10 - {f'{EMOJI["fire"]} Strong' if momentum > 6 else f'{EMOJI["lightning"]} Moderate' if momentum > 3 else f'{EMOJI["blue_circle"]} Weak'}")
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} *BTC Live*: ${price:,.0f} ({change_pct:+.1f}%) {trend_direction}"
+                        )
+
+                        momentum_strength = (
+                            f"{EMOJI['fire']} Strong"
+                            if momentum > 6
+                            else f"{EMOJI['lightning']} Moderate" if momentum > 3 else f"{EMOJI['blue_circle']} Weak"
+                        )
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} *Momentum Score*: {momentum:.1f}/10 - {momentum_strength}"
+                        )
                         
                         # Enhanced Support/Resistance con distanze precise
                         sr_data = calculate_crypto_support_resistance(price, change_pct)
@@ -4026,10 +4046,20 @@ class DailyContentGenerator:
                         from narrative_continuity import get_narrative_continuity
                         continuity = get_narrative_continuity()
                         morning_connection = continuity.get_lunch_morning_connection()
-                        
-                        msg1_parts.append(f"{EMOJI['bullet']} {morning_connection.get('morning_followup', f'{EMOJI["sunrise"]} From morning: Regime tracking - Intraday check')}")
-                        msg1_parts.append(f"{EMOJI['bullet']} {morning_connection.get('sentiment_tracking', f'{EMOJI["chart"]} Sentiment: Evolution analysis in progress')}")
-                        msg1_parts.append(f"{EMOJI['bullet']} {morning_connection.get('focus_areas_update', f'{EMOJI["target"]} Focus areas: Progress check active')}")
+
+                        morning_followup_default = f"{EMOJI['sunrise']} From morning: Regime tracking - Intraday check"
+                        sentiment_tracking_default = f"{EMOJI['chart']} Sentiment: Evolution analysis in progress"
+                        focus_areas_default = f"{EMOJI['target']} Focus areas: Progress check active"
+
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {morning_connection.get('morning_followup', morning_followup_default)}"
+                        )
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {morning_connection.get('sentiment_tracking', sentiment_tracking_default)}"
+                        )
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {morning_connection.get('focus_areas_update', focus_areas_default)}"
+                        )
                         
                         if 'predictions_check' in morning_connection:
                             msg1_parts.append(f"{EMOJI['bullet']} {morning_connection['predictions_check']}")
@@ -4796,7 +4826,11 @@ class DailyContentGenerator:
                         continuity = get_narrative_continuity()
                         noon_connection = continuity.get_evening_noon_connection()
                         
-                        msg1_parts.append(f"{EMOJI['bullet']} {noon_connection.get('noon_followup', f'{EMOJI['chart_up']} From noon: Progress tracking - objectives summary')}")
+                        noon_followup_default = f"{EMOJI['chart_up']} From noon: Progress tracking - objectives summary"
+
+                        msg1_parts.append(
+                            f"{EMOJI['bullet']} {noon_connection.get('noon_followup', noon_followup_default)}"
+                        )
                         msg1_parts.append(f"{EMOJI['bullet']} {noon_connection.get('predictions_summary', 'Prediction accuracy: see Evening Performance Review / Daily Summary')}")
                         msg1_parts.append(f"{EMOJI['bullet']} {noon_connection.get('regime_status', 'Market regime: see ML Sentiment blocks (Noon/Evening)')}")
                     else:

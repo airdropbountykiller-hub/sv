@@ -21,8 +21,8 @@
 ### 📂 Repository layout (where things live)
 - `modules/`: core runtime package (stays at repo root, not inside `config/`)
 - `config/`: configuration, operational storage and helper utilities (flat at root for quick access)
-  - `config/backups/`: business memory (flags, contexts, ML analysis, portfolio state)
-  - `config/debug_previews/`: plain-text previews generated for manual inspection
+  - `config/daily_contexts/` & `config/ml_analysis/`: business memory (contexts + coherence metrics)
+  - `config/previews/`: plain-text previews generated for manual inspection
   - `config/send_telegram_reports.py`: entry point to push saved JSON reports to Telegram (`python config/send_telegram_reports.py ...`)
   - `config/resolve_diary_conflict.sh`: quick helper to stage `DIARY.md` when Git still reports conflicts
   - `config/split_generators.py`: refactor utility to extract intraday generators from `modules/daily_generator.py`
@@ -100,7 +100,7 @@
 ### 🔌 Portfolio manager integration (broker-aware)
 The `modules/portfolio_manager.py` class already stores broker-specific limits and cluster rules. To wire it into the runtime:
 
-1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/backups/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
+1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
 2. **Feed data**: reuse existing market sources (`modules/engine/market_data.get_market_snapshot` for BTC/SPX/EURUSD/Gold, `get_live_equity_fx_quotes` for other tickers) and pass live quotes into `update_positions`.
 3. **Route signals**: send ML prediction cards (asset/entry/stop/target/confidence/broker) to `open_position`. Automated brokers (`IG`, `BYBIT_BTC`, `BYBIT_USDT`) accept bot trades; discretionary ones (`DIRECTA`, `TRADE_REPUBLIC`) can be surfaced to a UI/advisor queue when `auto_trading=False`.
 4. **Risk guardrails**: sizing uses per-broker risk caps; `open_position` enforces max open trades, per-asset limits and cluster exposure before booking a position.
@@ -111,7 +111,7 @@ The `modules/portfolio_manager.py` class already stores broker-specific limits a
 ### 🔌 Portfolio manager integration (broker-aware)
 The `modules/portfolio_manager.py` class already stores broker-specific limits and cluster rules. To wire it into the runtime:
 
-1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/backups/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
+1. **Instantiate**: `pm = get_portfolio_manager()`; it loads/saves state in `config/portfolio_state.json` and keeps daily history in `reports/portfolio_history/`. For isolated tests you can override the paths via `SVPortfolioManager(base_dir, portfolio_file=..., history_dir=...)`.
 2. **Feed data**: reuse existing market sources (`modules/engine/market_data.get_market_snapshot` for BTC/SPX/EURUSD/Gold, `get_live_equity_fx_quotes` for other tickers) and pass live quotes into `update_positions`.
 3. **Route signals**: send ML prediction cards (asset/entry/stop/target/confidence/broker) to `open_position`. Automated brokers (`IG`, `BYBIT_BTC`, `BYBIT_USDT`) accept bot trades; discretionary ones (`DIRECTA`, `TRADE_REPUBLIC`) can be surfaced to a UI/advisor queue when `auto_trading=False`.
 4. **Risk guardrails**: sizing uses per-broker risk caps; `open_position` enforces max open trades, per-asset limits and cluster exposure before booking a position.
@@ -164,7 +164,7 @@ The `modules/portfolio_manager.py` class already stores broker-specific limits a
 |- ✅ **Evening Performance Review reso onesto**: nessun "4/4 (100%)" hard-coded; blocco *Trading Performance Summary* ora è condizionale su `hits/total` (Strong/Good/Mixed/Challenging).
 |- ✅ **Summary Page 2/3 coerenti**: se `accuracy_pct=0` la sezione *Technical Signals* assume tono critico e le *Risk Metrics* mostrano Sharpe/Win Rate coerenti (o N.A. quando mancano dati).
 |- ✅ **Intraday sentiment tracking**: Press→Morning→Noon→Evening salvano sentiment in `reports/8_daily_content/sentiment_tracking_YYYY-MM-DD.json` e Summary Page 6 mostra catena reale (es. "Stable NEGATIVE throughout the day").
-|- ✅ **Structured Journal & Coherence Manager**: `journal_YYYY-MM-DD.json` include `daily_accuracy_grade` e `sentiment_intraday_evolution`; `coherence_manager.py` salva metriche in `config/backups/ml_analysis/coherence_YYYY-MM-DD.json` + `coherence_history.json`.
+|- ✅ **Structured Journal & Coherence Manager**: `journal_YYYY-MM-DD.json` include `daily_accuracy_grade` e `sentiment_intraday_evolution`; `coherence_manager.py` salva metriche in `config/ml_analysis/coherence_YYYY-MM-DD.json` + `coherence_history.json`.
 |- ✅ **Noon 3/3 ripulito**: rimosso blocco duplicato "Morning Predictions Update"; rimane solo `MORNING PREDICTIONS VERIFICATION` + `Daily Accuracy`.
 
 **Previous (Nov 15, 2025 - v1.4.2): Content Quality Enhancement**
@@ -535,16 +535,17 @@ H:/il mio drive/sv/
 ### **📂 ORGANIZED DIRECTORIES BY FUNCTION:**
 ```
 modules/                 ← Production Python code
-config/                  ← Config + business memory + debug previews
-  ├── backups/           ← Critical business memory (flags, contexts, ML analytics)
-  ├── debug_previews/    ← Text previews generated by temp_tests/preview_full_day.py
+config/                  ← Config + business memory (no data/)
+  ├── daily_contexts/    ← Daily narrative snapshots
+  ├── ml_analysis/       ← Coherence metrics + history
+  ├── previews/          ← Text previews generated by temp_tests/preview_full_day.py
+  ├── templates/         ← HTML dashboard templates (dashboard reads from here)
   ├── private.txt        ← Telegram credentials
   ├── requirements.txt   ← Python dependencies
   ├── .gitignore         ← Git exclusions
   ├── sv_config.py       ← System configuration
   ├── sv_paths.py        ← Path management
   └── performance_config.py ← Performance settings
-templates/               ← HTML dashboard templates
 reports/                 ← System outputs by priority
   ├── 1_daily/           ← Maximum priority
   ├── 2_weekly/          ← Second level
@@ -568,21 +569,22 @@ data/ (external, not tracked)
 ```
 **Philosophy**: *"Provision externally; system will not auto-create or track it"*
 
-#### **🧠 `config/backups/` = BUSINESS DATA AND OPERATIONAL MEMORY**
+#### **🧠 `config/` = BUSINESS DATA AND OPERATIONAL MEMORY**
 ```
-config/backups/
-├── daily_session.json         ← Current trading session state
+config/
 ├── daily_contexts/            ← Daily market narrative + tomorrow setup snapshots
-└── ml_analysis/               ← Historical coherence + accuracy metrics
-    ├── coherence_YYYY-MM-DD.json   ← Per-day coherence + accuracy (Coherence Manager)
-    ├── coherence_history.json      ← Rolling window of last N days (trend)
-    └── …
+├── ml_analysis/               ← Historical coherence + accuracy metrics
+│   ├── coherence_YYYY-MM-DD.json   ← Per-day coherence + accuracy (Coherence Manager)
+│   ├── coherence_history.json      ← Rolling window of last N days (trend)
+│   └── …
+├── portfolio_state.json       ← Portfolio manager state
+└── previews/                  ← Plain-text previews for manual QA
 ```
 **Philosophy**: *"If you lose these files, you lose business memory and continuity"*
 
 #### **🎭 SIMPLE ANALOGY:**
 - **`data/` = ENGINE ROOM** → Engines, cache, system logs (repairable)
-- **`config/backups/` = BRAIN** → Memories, decisions, continuity (irreplaceable)
+- **`config/` = BRAIN** → Memories, decisions, continuity (irreplaceable)
 
 ---
 
@@ -629,7 +631,7 @@ Monday 08:35 → 📊 WEEKLY REPORT     (After press review)
 #### **⚠️ DEVELOPMENT COMMANDMENTS:**
 1. **NEVER modify ROOT structure without explicit approval**
 2. **ALWAYS put development code in `temp_tests/`**  
-3. **NEVER mix technical data (`data/`) with business (`config/backups/`)**
+3. **NEVER mix technical data (`data/`) with business (`config/`)**
 4. **ALWAYS respect numerical priority in reports (1=maximum)**
 5. **NEVER change scheduler hours without authorization**
 
@@ -657,7 +659,7 @@ monthly_generator.py     ← Monthly comprehensive reports
 ```
 momentum_indicators.py   ← Intraday signals and technical ML helpers
 regime_manager.py        ← Unified regime/sentiment manager (Engine↔Brain bridge)
-coherence_manager.py     ← Aggregates daily coherence + accuracy metrics into config/backups/
+coherence_manager.py     ← Aggregates daily coherence + accuracy metrics into config/ml_analysis/
 period_aggregator.py     ← Weekly/monthly aggregations from daily_metrics_YYYY-MM-DD.json
 ```
 
@@ -736,7 +738,7 @@ pdf_generator.py        ← Professional PDF reports system (ENHANCED)
 ```
 daily_generator_backup_20251122.py  ← Legacy backup of daily_generator (Nov 22, 2025)
   └── Not imported anywhere; kept only as historical reference.
-  └── Recommended: move under config/backups/ or remove once no longer needed.
+  └── Recommended: move under config/ or remove once no longer needed.
 ```
 
 ---
@@ -778,7 +780,7 @@ daily_generator_backup_20251122.py  ← Legacy backup of daily_generator (Nov 22
 - **Brain**: takes the Engine’s technical snapshot and, using the shared 555 ML model families (AdaBoost, Random Forest, XGBoost, SVM, etc.), produces **ML sentiment, market regime, and per-asset trading signals** (entry/target/stop, confidence, R:R, catalyst).
 - The result is a structured **market snapshot** for that time slot (e.g. 08:30, 13:00) that is cached briefly and used by all message generators.
 - Each message keeps its **existing template/structure** (7 PR, 3+3+3 intraday, 6 Summary), but acts as a pure **formatter** that reads these snapshot fields instead of recomputing data internally.
-- A separate **Coherence Manager** layer reads the snapshots + sent messages + daily journal (Page 6 + JSON) to evaluate narrative consistency and prediction accuracy, storing metrics in `config/backups/` so Engine/Brain can adapt in future runs.
+- A separate **Coherence Manager** layer reads the snapshots + sent messages + daily journal (Page 6 + JSON) to evaluate narrative consistency and prediction accuracy, storing metrics in `config/ml_analysis/` so Engine/Brain can adapt in future runs.
 
 ### **🕰️ TEMPORAL PIPELINE WITH COMPLETE HIERARCHICAL VERIFICATION:**
 ```

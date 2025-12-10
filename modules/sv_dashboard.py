@@ -43,6 +43,7 @@ from modules.brain.prediction_status import (
     calculate_prediction_accuracy,
     compute_prediction_status,
 )
+from config import sv_paths
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -53,7 +54,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Base directories
 BASE_DIR = project_root
-TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+TEMPLATES_DIR = sv_paths.TEMPLATES_DIR
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 app = Flask(__name__, template_folder=TEMPLATES_DIR)

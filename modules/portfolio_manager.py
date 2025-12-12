@@ -4,7 +4,6 @@ SV Portfolio Manager - $25K Initial Capital
 Tracks ML signals and calculates real P&L for dashboard display
 """
 
-from pathlib import Path
 import json
 import os
 from datetime import datetime, timedelta
@@ -12,7 +11,12 @@ from typing import Dict, Any, Optional
 import logging
 
 from config import sv_paths
-from modules.portfolio import AllocationPlanner, PortfolioStateBuilder, RiskManager, TradeExecutor
+from modules.portfolio import (
+    AllocationPlanner,
+    PortfolioStateBuilder,
+    RiskManager,
+    TradeExecutor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +26,8 @@ class SVPortfolioManager:
 
     def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
         self.base_dir = base_dir
-        self.portfolio_file = portfolio_file or sv_paths.PORTFOLIO_STATE_FILE
+        self.portfolio_file = portfolio_file or str(sv_paths.PORTFOLIO_STATE_FILE)
+        self.signals_file = str(sv_paths.PORTFOLIO_SIGNALS_FILE)
         self.history_dir = history_dir or os.path.join(base_dir, 'reports', 'portfolio_history')
 
         self.asset_clusters = {
@@ -32,16 +37,7 @@ class SVPortfolioManager:
             'SPY': 'equity', 'QQQ': 'equity', 'AAPL': 'equity', 'MSFT': 'equity',
             'EURUSD': 'fx', 'EURUSD=X': 'fx',
             'GOLD': 'commodities', 'XAUUSD=X': 'commodities',
-            'BND': 'bonds', 'LQD': 'bonds', 'IEF': 'bonds', 'TLT': 'bonds', 'AGG': 'bonds',
         }
-
-        self.allocation_planner = AllocationPlanner()
-        self.risk_manager = RiskManager()
-        self.trade_executor = TradeExecutor()
-        self.state_builder = PortfolioStateBuilder(
-            state_file=self.portfolio_file,
-            signals_file=sv_paths.PORTFOLIO_SIGNALS_FILE,
-        )
 
         self.broker_profiles = self._init_broker_profiles()
 
@@ -50,12 +46,17 @@ class SVPortfolioManager:
         self.max_position_size = 0.20  # fallback max per trade
         self.risk_per_trade = 0.02     # fallback risk per trade
 
+        # Decision layer helpers
+        self.allocation_planner = AllocationPlanner()
+        self.risk_manager = RiskManager()
+        self.trade_executor = TradeExecutor()
+        self.state_builder = PortfolioStateBuilder(self.portfolio_file, self.signals_file)
+
         # Ensure directories exist
         os.makedirs(os.path.dirname(self.portfolio_file), exist_ok=True)
         os.makedirs(self.history_dir, exist_ok=True)
 
         self.portfolio = self._load_portfolio()
-        self._refresh_decision_layer()
 
     def _init_broker_profiles(self) -> Dict[str, Dict[str, Any]]:
         """Define broker-specific sizing/limit rules."""
@@ -164,6 +165,34 @@ class SVPortfolioManager:
         self._save_portfolio(portfolio)
         logger.info(f"Created new portfolio: ${self.initial_capital}")
         return portfolio
+
+    def generate_operational_signals(self) -> Dict[str, Any]:
+        """Build allocation/risk snapshots and routed trade signals."""
+
+        allocation = self.allocation_planner.calculate_allocation(
+            self.portfolio.get('active_positions', []),
+            self.portfolio.get('available_cash', 0.0),
+            self.portfolio.get('current_balance', 0.0),
+            self.asset_clusters,
+        )
+
+        risk = self.risk_manager.evaluate(
+            self.portfolio.get('current_balance', 0.0),
+            self.portfolio.get('total_invested', 0.0),
+            self.portfolio.get('available_cash', 0.0),
+            self.portfolio.get('daily_balances', []),
+        )
+
+        routed_trades = self.trade_executor.assign(allocation.recommended_trades)
+
+        state = self.state_builder.build_state(
+            self.portfolio,
+            allocation.__dict__,
+            risk.__dict__,
+            routed_trades,
+        )
+        signals = self.state_builder.build_signals(routed_trades)
+        return {"state": state, "signals": signals}
     
     def _save_portfolio(self, portfolio: Dict[str, Any]):
         """Save portfolio state to disk"""
@@ -198,50 +227,6 @@ class SVPortfolioManager:
         portfolio['brokers'] = brokers
         portfolio.setdefault('initial_capital', self.initial_capital)
         return portfolio
-
-    def _allocation_to_dict(self, allocation_result):
-        return {
-            'target_allocation_pct': allocation_result.target_allocation,
-            'exposure_by_class': {
-                k: round(v, 2) for k, v in allocation_result.exposure_by_class.items()
-            },
-            'exposure_pct': {
-                k: round(v, 2) for k, v in allocation_result.exposure_pct.items()
-            },
-            'deviations': {
-                k: round(v, 2) for k, v in allocation_result.deviations.items()
-            },
-            'recommended_trades': allocation_result.recommended_trades,
-        }
-
-    def _refresh_decision_layer(self):
-        """Compute allocation/risk state and write JSON outputs."""
-
-        allocation_result = self.allocation_planner.calculate_allocation(
-            positions=self.portfolio.get('active_positions', []),
-            cash_available=self.portfolio.get('available_cash', 0.0),
-            portfolio_balance=self.portfolio.get('current_balance', 0.0),
-            cluster_map=self.asset_clusters,
-        )
-
-        risk_snapshot = self.risk_manager.evaluate(
-            portfolio_balance=self.portfolio.get('current_balance', 0.0),
-            invested=self.portfolio.get('total_invested', 0.0),
-            cash_available=self.portfolio.get('available_cash', 0.0),
-            daily_balances=self.portfolio.get('daily_balances', []),
-        )
-
-        routed_trades = self.trade_executor.assign(allocation_result.recommended_trades)
-
-        decision_state = self.state_builder.build_state(
-            base_portfolio=self.portfolio,
-            allocation=self._allocation_to_dict(allocation_result),
-            risk=risk_snapshot.__dict__,
-            trades=routed_trades,
-        )
-
-        self.state_builder.build_signals(routed_trades)
-        self.portfolio['decision_layer'] = decision_state['decision_layer']
     
     def calculate_position_size(self, entry_price: float, stop_price: float,
                               confidence: int, broker: str) -> float:
@@ -541,8 +526,6 @@ class SVPortfolioManager:
             total_losses = abs(sum(p.get('final_pnl', 0) for p in losing_trades))
             if total_losses > 0:
                 metrics['profit_factor'] = total_wins / total_losses
-
-        self._refresh_decision_layer()
     
     def get_portfolio_snapshot(self) -> Dict[str, Any]:
         """Get current portfolio snapshot for dashboard"""
@@ -567,7 +550,6 @@ class SVPortfolioManager:
             'performance_metrics': self.portfolio['performance_metrics'],
             'positions': self.portfolio['active_positions'],
             'brokers': broker_snapshots,
-            'decision_layer': self.portfolio.get('decision_layer'),
         }
 
     def describe_configuration(self) -> Dict[str, Any]:
@@ -662,7 +644,7 @@ class SVPortfolioManager:
 def get_portfolio_manager(base_dir: str = None) -> SVPortfolioManager:
     """Get portfolio manager instance"""
     if base_dir is None:
-        base_dir = Path(__file__).resolve().parent.parent
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     return SVPortfolioManager(base_dir)
 

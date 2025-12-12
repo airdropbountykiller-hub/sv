@@ -21,6 +21,7 @@ project_root = os.path.dirname(current_dir)  # repository root
 config_dir = os.path.join(project_root, "config")
 sys.path.insert(0, project_root)  # Enable imports from modules package at repo root
 sys.path.insert(0, config_dir)    # Add config for sv_paths and settings
+from config import sv_paths
 
 try:
     from modules.sv_news import get_sv_news_system
@@ -43,7 +44,6 @@ from modules.brain.prediction_status import (
     calculate_prediction_accuracy,
     compute_prediction_status,
 )
-from config import sv_paths
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -54,7 +54,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Base directories
 BASE_DIR = project_root
-TEMPLATES_DIR = sv_paths.TEMPLATES_DIR
+TEMPLATES_DIR = str(sv_paths.TEMPLATES_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 app = Flask(__name__, template_folder=TEMPLATES_DIR)

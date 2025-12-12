@@ -2128,3 +2128,4 @@ if messages:
 ### Incident Notes (Config import / Telegram delivery)
 - Config import failures seen on Windows runs were due to the launch path omitting the repository root from `sys.path`; fixed by resolving the project root with `Path(__file__).resolve().parent.parent` and appending it before imports. 【F:modules/main.py†L16-L19】【F:modules/daily_generator.py†L14-L20】
 - Telegram messages were not delivered when credentials in `config/private.txt` remained as placeholders; the handler now warns at startup and skips silent failures, so valid `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` values are required. 【F:modules/telegram_handler.py†L84-L113】【F:modules/telegram_handler.py†L388-L463】
+- The complete technical document (`DOCUMENTO_TECNICO_COMPLETO.md`) was revalidated and restored to the repository root after an accidental removal to ensure documentation completeness for future commits. 【F:DOCUMENTO_TECNICO_COMPLETO.md†L1-L258】

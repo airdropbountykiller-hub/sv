@@ -256,3 +256,6 @@ Flusso principale: ENGINE → BRAIN → PORTFOLIO → PRODUCTION → DASHBOARD �
 │ Task Scheduling│
 └───────────────┘
 ```
+
+## Nota di manutenzione
+Questo documento tecnico completo è stato ricontrollato e ripristinato nel repository dopo una rimozione involontaria, in modo da mantenere disponibile la descrizione integrale del sistema.

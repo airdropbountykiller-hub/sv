@@ -404,15 +404,8 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 - `config/send_telegram_reports.py` – richiamato da `SV_Start.bat` per inviare report JSON già salvati a Telegram; strumento operativo non di core.
   - `temp_tests/*.py` – script di test/preview (`preview_full_day.py`, `generate_weekly.py`, `generate_monthly.py`, test qualità news, ecc.); non importati dai moduli di produzione.
 
-- **Legacy / Backup (CANDIDATO ARCHIVIAZIONE)**
-  - `config/backups/daily_generator_20251122.py`:
-    - backup storico di `daily_generator.py` prima del refactor del 22/11,
-    - spostato fuori da `modules/` per evitare confusione con il codice attivo.
-
-- **Nuovo backup di sicurezza (23 Nov, pre‑modularizzazione)**
-  - `config/backups/daily_generator_20251123_before_modularization.py`:
-    - snapshot completo dell’attuale `modules/daily_generator.py` **prima** di iniziare la modularizzazione Engine/Brain,
-    - riferimento immediato per eventuale rollback locale.
+- **Legacy / Backup (RIMOSSI)**
+  - I backup storici `config/backups/daily_generator_20251122.py` e `config/backups/daily_generator_20251123_before_modularization.py` sono stati eliminati manualmente; l’unico generatore attivo resta `modules/daily_generator.py`.
 
 ### Verifica preview post‑modifiche (23 Nov, `preview_full_day.py`)
 
@@ -2131,3 +2124,7 @@ if messages:
 - ⚠️ Summary formatting: Fixed (verification tomorrow)
 
 ---
+
+### Incident Notes (Config import / Telegram delivery)
+- Config import failures seen on Windows runs were due to the launch path omitting the repository root from `sys.path`; fixed by resolving the project root with `Path(__file__).resolve().parent.parent` and appending it before imports. 【F:modules/main.py†L16-L19】【F:modules/daily_generator.py†L14-L20】
+- Telegram messages were not delivered when credentials in `config/private.txt` remained as placeholders; the handler now warns at startup and skips silent failures, so valid `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` values are required. 【F:modules/telegram_handler.py†L84-L113】【F:modules/telegram_handler.py†L388-L463】

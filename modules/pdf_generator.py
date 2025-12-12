@@ -5,6 +5,7 @@ SV - PDF Generatetor Module
 System to Generatete report PDF professionali per Content Createtion Engine
 """
 
+from pathlib import Path
 import os
 import datetime
 from typing import Dict, List, Optional, Any
@@ -46,7 +47,7 @@ class SVPDFGeneratetor:
             raise ImportError("ReportLab package required for PDF Generatetion")
         
         # Directory per PDF output basata su timeframe
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        project_root = Path(__file__).resolve().parent.parent
         timeframe_folders = {
             'daily': '1_daily',
             'weekly': '2_weekly', 
@@ -1112,6 +1113,5 @@ def test_pdf_Generatetion():
 
 if __name__ == '__main__':
     test_pdf_Generatetion()
-
 
 

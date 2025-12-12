@@ -79,27 +79,57 @@ Output:
 - `brain_signals.json` → invio al modulo PORTFOLIO.
 
 ## 6. PORTFOLIO — Decision Layer
-Obiettivo: gestione multi-asset e multi-broker, incluse posizioni, esposizione, rischio, segnali operativi, strategie, notifiche e rendicontazione costi.
+Obiettivo: gestire portafogli multi-asset e multi-broker, calcolando esposizione, rischio, deviazioni dai target e segnali operativi. Il layer combina ENGINE + BRAIN + stato corrente per generare raccomandazioni o ordini automatici (solo dove abilitati) e invia le notifiche operative.
 
-Allocazione target (percentuale totale):
+**Funzioni principali**
+- Multi-asset (cash, azioni/ETF, obbligazioni, crypto) e multi-broker.
+- Risk management (volatilità, drawdown, esposizione per asset class).
+- Ribilanciamento periodico/straordinario.
+- Strategie automatizzate per broker abilitati.
+- Output operativi: `portfolio_state.json` e `portfolio_signals.json` (anche verso Telegram).
 
-| Asset Class | Percentuale | Note |
+### 6.1 Portfolio Asset Classes
+Target di allocazione (configurati in `config/config.txt`):
+
+| Asset Class | Target Allocation | Note |
 | --- | --- | --- |
-| Liquidità | 20% | Buffer per ordini e volatilità |
-| Indici / Azioni / ETF oro | 40% | ETF azioni, indici e oro |
-| Obbligazioni | 20% | Titoli o ETF obbligazionari |
-| Crypto (derivati e spot) | 20% | Solo su Bybit, bot trading attivo |
+| Cash | 20% | Buffer per ordini, alta volatilità, emergenze |
+| Indici / Stocks / ETFs (incluso oro via ETF) | 40% | ETF globali e settoriali, oro fisico tramite ETF |
+| Bonds | 20% | Governativi, corporate, bond ETF |
+| Crypto (spot + derivati) | 20% | Solo Bybit, parte usata per bot trading |
 
-**Distribuzione Broker**
+### 6.2 Broker Distribution
 
-| Broker | Tipo gestione | Asset principali | Note operative |
+| Broker | Management Type | Main Assets | Operational Policy |
 | --- | --- | --- | --- |
-| Bybit | Bot trading | Derivati e spot crypto | Bot operativo, metà capitale broker attivo |
-| IG Italia | Bot trading | Spot + derivati ETF/azioni/indici | Bot operativo, metà capitale broker |
-| Directa | Medio-lungo | Azioni, ETF (oro), obbligazioni, liquidità | Riceve notifiche operative, nessun ordine automatico |
-| Trade Republic | Medio-lungo | Azioni, ETF (oro), obbligazioni, liquidità | Riceve notifiche operative, nessun ordine automatico |
+| Bybit | Bot trading | Crypto spot e derivati | Bot attivo (50% capitale) |
+| IG Italia | Bot trading | Indici, ETF, azioni (CFD/spot) | Bot attivo (50% margine) |
+| Directa | Medio-lungo termine | Azioni, ETF, obbligazioni | Solo notifiche, nessun ordine automatico |
+| Trade Republic | Medio-lungo termine | Azioni, ETF, obbligazioni | Solo notifiche, nessun ordine automatico |
 
-Tracciamento operazioni: ogni operazione registra broker, timestamp, asset, azione, quantità, prezzo unitario, totale, commissioni, tasse stimate e rationale decisionale. Ribilanciamento: mensile o straordinario ±10% target. Output JSON: `portfolio_state.json`, `portfolio_signals.json` per Telegram.
+### 6.3 Decision Logic
+PORTFOLIO fonde indicatori tecnici (ENGINE), segnali ML/AI (BRAIN), posizioni correnti, rischio e deviazioni dai target. Genera:
+- **Operational signals** BUY/SELL/HOLD con punteggi tecnici e AI (0–1), priorità broker e esposizione per asset class.
+- **Recommended trades** solo se la deviazione dall’obiettivo supera ±10%, le condizioni tecnico/AI sono favorevoli e il broker è abilitato (Bybit/IG per gli ordini automatici).
+- **Rebalancing** mensile e straordinario quando le asset class eccedono ±10% dal target.
+- **Smart SL/TP** basati su ATR, drawdown recente e segnali opposti.
+
+### 6.4 Trade Tracking
+Ogni operazione traccia: broker, timestamp, asset, azione, quantità, prezzo medio, valore totale, commissioni, tasse stimate, rationale decisionale (tecnico + AI + allocazione + rischio). Lo storico è salvato con `portfolio_state.json`.
+
+### 6.5 JSON Outputs
+- `portfolio_state.json` → stato completo del portafoglio (posizioni, esposizione, storico operazioni).
+- `portfolio_signals.json` → segnali operativi e proposte di trade, inviati anche a Telegram.
+
+### 6.6 Module Components
+Progettazione modulare prevista sotto `modules/portfolio/`:
+- `allocator.py`: calcolo deviazione dai target e ripartizione per asset class.
+- `risk_manager.py`: volatilità, drawdown, rischio per asset/cluster.
+- `executor.py`: generazione ed esecuzione trade (solo broker abilitati).
+- `portfolio_state_builder.py`: costruzione finale dei JSON operativi.
+
+### 6.7 Internal Flow
+ENGINE (indicatori) → BRAIN (segnali ML) → PORTFOLIO (allocator → risk_manager → executor) → `portfolio_state.json` + `portfolio_signals.json` → Telegram + Dashboard.
 
 ## 7. PRODUCTION — Reportistica
 **Report giornalieri**

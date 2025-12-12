@@ -5,6 +5,7 @@ SV - Predictive Analyzer Module
 Generate next week recommendations based on historical patterns and trends
 """
 
+from pathlib import Path
 import os
 import json
 import logging
@@ -17,7 +18,7 @@ class PredictiveWeeklyAnalyzer:
     """Generate predictive insights and recommendations for next week"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.project_root = Path(__file__).resolve().parent.parent
     
     def analyze_asset_patterns(self, daily_data: Dict, performance_attribution: Dict) -> Dict[str, Any]:
         """Identify asset-specific patterns and predict next week performance"""

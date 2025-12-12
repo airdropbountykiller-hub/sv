@@ -5,6 +5,7 @@ SV - Monthly Report Generatetor
 Generate report mensili estesi per analisi completa 30 giorni
 """
 
+from pathlib import Path
 import datetime
 import pytz
 import json
@@ -14,9 +15,9 @@ from typing import Dict, List, Optional, Any
 import logging
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, 'config', 'modules'))
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
+sys.path.append(str(project_root / 'config' / 'modules'))
 
 log = logging.getLogger(__name__)
 
@@ -743,6 +744,5 @@ def test_monthly_Generatetion():
 
 if __name__ == '__main__':
     test_monthly_Generatetion()
-
 
 

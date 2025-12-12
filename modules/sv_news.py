@@ -6,6 +6,7 @@ News system per Content Creation Engine
 Estratto dalle migliori funzionalitÃ  di 555.py e 555a_server.py
 """
 
+from pathlib import Path
 import datetime
 from datetime import timezone, timedelta
 import feedparser
@@ -154,7 +155,7 @@ class SVNewsSystem:
     def setup_news_cache(self):
         """Setup news caching system - now correctly in data/news_cache"""
         # From modules/ directory, go up to project root
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        project_root = Path(__file__).resolve().parent.parent
         self.cache_dir = os.path.join(project_root, 'data', 'news_cache')
 
         if os.path.isdir(self.cache_dir):
@@ -534,7 +535,6 @@ def test_sv_news():
 
 if __name__ == '__main__':
     test_sv_news()
-
 
 
 

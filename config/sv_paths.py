@@ -42,16 +42,6 @@ def get_news_cache_dir():
     return news_cache_dir
 
 
-def get_backups_dir():
-    """Get backups directory (for flags and system state)"""
-    return os.path.join(get_config_dir(), 'backups')
-
-
-def get_debug_previews_dir():
-    """Get debug previews directory (text previews of generated content)"""
-    return os.path.join(get_config_dir(), 'debug_previews')
-
-
 def _safe_makedirs(path: str) -> Path:
     """Create directories unless they are under the externally managed data/ root."""
 
@@ -76,7 +66,32 @@ def get_reports_dir():
 
 def get_templates_dir():
     """Get templates directory"""
-    return os.path.join(get_project_root(), 'templates')
+    return os.path.join(get_config_dir(), 'templates')
+
+
+def get_daily_contexts_dir():
+    """Location for narrative context snapshots (formerly under backups/)."""
+    return os.path.join(get_config_dir(), 'daily_contexts')
+
+
+def get_ml_analysis_dir():
+    """Location for coherence and ML analysis artifacts (formerly under backups/)."""
+    return os.path.join(get_config_dir(), 'ml_analysis')
+
+
+def get_preview_dir():
+    """Plain-text previews directory (stored alongside other configs)."""
+    return os.path.join(get_config_dir(), 'previews')
+
+
+def get_flags_file():
+    """Scheduler flags file stored alongside config state."""
+    return os.path.join(get_config_dir(), 'sv_flags.json')
+
+
+def get_portfolio_state_file():
+    """Portfolio manager state file under config/."""
+    return os.path.join(get_config_dir(), 'portfolio_state.json')
 
 
 # Path constants
@@ -85,21 +100,25 @@ MODULES_DIR = get_modules_dir()
 DATA_DIR = get_data_dir()
 CACHE_DIR = get_cache_dir()
 NEWS_CACHE_DIR = get_news_cache_dir()
-BACKUPS_DIR = get_backups_dir()
 REPORTS_DIR = get_reports_dir()
 TEMPLATES_DIR = get_templates_dir()
 CONFIG_DIR = get_config_dir()
-DEBUG_PREVIEWS_DIR = get_debug_previews_dir()
+DAILY_CONTEXTS_DIR = get_daily_contexts_dir()
+ML_ANALYSIS_DIR = get_ml_analysis_dir()
+PREVIEWS_DIR = get_preview_dir()
+FLAGS_FILE = get_flags_file()
+PORTFOLIO_STATE_FILE = get_portfolio_state_file()
 
 
 def setup_all_directories():
     """Create necessary non-data directories"""
     directories = [
-        BACKUPS_DIR,
         REPORTS_DIR,
         TEMPLATES_DIR,
         CONFIG_DIR,
-        DEBUG_PREVIEWS_DIR,
+        DAILY_CONTEXTS_DIR,
+        ML_ANALYSIS_DIR,
+        PREVIEWS_DIR,
     ]
 
     for directory in directories:
@@ -116,8 +135,10 @@ if __name__ == '__main__':
     print(f"📂 Data (external): {DATA_DIR}")
     print(f"📂 Cache (depends on data): {CACHE_DIR}")
     print(f"📂 News Cache (depends on data): {NEWS_CACHE_DIR}")
-    print(f"📁 Backups: {BACKUPS_DIR}")
     print(f"📂 Reports: {REPORTS_DIR}")
     print(f"📂 Templates: {TEMPLATES_DIR}")
     print(f"📂 Config: {CONFIG_DIR}")
+    print(f"📂 Daily contexts: {DAILY_CONTEXTS_DIR}")
+    print(f"📂 ML analysis: {ML_ANALYSIS_DIR}")
+    print(f"📂 Previews: {PREVIEWS_DIR}")
     setup_all_directories()

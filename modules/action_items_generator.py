@@ -5,6 +5,7 @@ SV - Action Items Generator
 Automatic generation of actionable tasks based on performance metrics and insights
 """
 
+from pathlib import Path
 import os
 import json
 import logging
@@ -18,7 +19,7 @@ class ActionItemsGenerator:
     """Generate actionable tasks based on comprehensive analytics"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.project_root = Path(__file__).resolve().parent.parent
         
         # Priority scoring weights
         self.priority_weights = {

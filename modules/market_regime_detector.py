@@ -5,6 +5,7 @@ SV - Market Regime Detection Module
 Advanced market regime analysis based on volatility, trend, and sentiment indicators
 """
 
+from pathlib import Path
 import os
 import json
 import numpy as np
@@ -19,7 +20,7 @@ class MarketRegimeDetector:
     """Detect and analyze market regimes from daily data"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.project_root = Path(__file__).resolve().parent.parent
         
         # Regime classification thresholds
         self.volatility_thresholds = {

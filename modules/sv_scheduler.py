@@ -5,6 +5,7 @@ SV - Enhanced Scheduler with Market intelligence
 Sistema di scheduling intelligente con calendar integration
 """
 
+from pathlib import Path
 import datetime
 import pytz
 import json
@@ -14,8 +15,8 @@ import logging
 from typing import Dict, Optional, List
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
 
 from config import sv_paths
 
@@ -437,6 +438,5 @@ def test_scheduler():
 
 if __name__ == '__main__':
     test_scheduler()
-
 
 

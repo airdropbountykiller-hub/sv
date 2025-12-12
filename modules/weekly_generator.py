@@ -16,9 +16,9 @@ from pathlib import Path
 import glob
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, 'config', 'modules'))
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
+sys.path.append(str(project_root / 'config' / 'modules'))
 
 # Setup logging
 log = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class WeeklyDataAssembler:
     """Aggregates real data from daily JSON files for weekly reports"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.project_root = Path(__file__).resolve().parent.parent
         self.daily_metrics_dir = os.path.join(self.project_root, 'reports', 'metrics')
         self.journals_dir = os.path.join(self.project_root, 'reports', 'journals')
         self.messages_dir = os.path.join(self.project_root, 'reports', '1_daily')

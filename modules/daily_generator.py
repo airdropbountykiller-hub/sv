@@ -32,8 +32,8 @@ except Exception:
     pass
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
 # Already in modules directory
 
 from config import sv_paths

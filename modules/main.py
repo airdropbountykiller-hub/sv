@@ -5,6 +5,7 @@ SV - Main Orchestrator
 Coordina tutti i piccoli script modulari del sistema SV
 """
 
+from pathlib import Path
 import sys
 import os
 import time
@@ -13,9 +14,9 @@ import threading
 from datetime import datetime, timedelta
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, 'config', 'modules'))
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
+sys.path.append(str(project_root / 'config' / 'modules'))
 
 # Setup logging
 logging.basicConfig(
@@ -301,6 +302,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 

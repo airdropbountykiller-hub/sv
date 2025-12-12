@@ -5,6 +5,7 @@ SV - Performance Attribution Analyzer
 Detailed performance analysis by asset, day, strategy type
 """
 
+from pathlib import Path
 import os
 import json
 import logging
@@ -18,7 +19,7 @@ class PerformanceAttributionAnalyzer:
     """Analyze performance attribution across multiple dimensions"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.project_root = Path(__file__).resolve().parent.parent
     
     def analyze_by_asset(self, daily_data: Dict) -> Dict[str, Any]:
         """Analyze performance by individual asset"""

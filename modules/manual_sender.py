@@ -5,6 +5,7 @@ SV - Manual Content Sender
 Sistema per invio manuale dei contenuti - bypassa scheduler e recovery
 """
 
+from pathlib import Path
 import sys
 import os
 import argparse
@@ -13,9 +14,9 @@ from typing import List, Optional
 import datetime
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, 'config', 'modules'))
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
+sys.path.append(str(project_root / 'config' / 'modules'))
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

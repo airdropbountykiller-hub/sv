@@ -158,16 +158,16 @@ reports/
 
 ---
 
-### **5. config/backups/** (4 files, ~0 MB = 4 KB)
+### **5. config/** (state & ML analysis)
 
 **Runtime state e session data**
 
 ```
-config/backups/
+config/
 ├── sv_flags.json (0.2 KB)                    📍 Scheduler flags (aggiornato 18:59)
 ├── daily_session.json (0.7 KB)               📊 Session tracking (31 Oct)
-├── contexts_2025-10-30.json (2.4 KB)         🧠 ML contexts
-└── ml_analysis_2025-10-30_1843.json (0.7 KB) 🔬 ML analysis results
+├── daily_contexts/                           🧠 ML contexts
+└── ml_analysis/                              🔬 ML analysis results
 ```
 
 **sv_flags.json attuale:**
@@ -228,7 +228,7 @@ templates/
 | temp_test/ | 0.07 | 2.2% | 5 | 🔄 Future |
 | templates/ | 0.10 | 3.1% | 3 | ✅ Static |
 | config/ | 0.02 | 0.6% | 6 | ✅ Active |
-| config/backups/ | ~0 | ~0% | 4 | ✅ Active |
+| previews/ | ~0 | ~0% | 5 | ✅ Active |
 | data/ | 0 | 0% | 0 | ⚠️ Empty |
 | **TOTAL** | **3.22 MB** | **100%** | **465** | **✅ OPERATIONAL** |
 

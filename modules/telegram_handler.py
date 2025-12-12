@@ -47,7 +47,7 @@ def load_private_config(config_file: str = 'config/private.txt') -> Dict[str, st
     config = {}
     
     # Cerca il file nella directory del progetto
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    project_root = Path(__file__).resolve().parent.parent
     config_path = os.path.join(project_root, config_file)
     
     try:
@@ -104,9 +104,12 @@ class TelegramHandler:
             'retry_attempts': 3,
             'retry_delay': 5,  # secondi
             'enable_preview': False,  # Disabilita preview link per default
-'parse_mode': 'HTML',  # Enable HTML formatting for bold/italic
+            'parse_mode': 'HTML',  # Enable HTML formatting for bold/italic
             'timeout': 10  # timeout richieste
         }
+
+        if self.bot_token == 'YOUR_BOT_TOKEN_HERE' or self.chat_id == 'YOUR_CHAT_ID_HERE':
+            log.warning("[WARN] [TELEGRAM] Missing bot token or chat id - messages will not be delivered until configured")
         
         # Text-based tags to avoid emoji problems
         self.content_emojis = {
@@ -387,59 +390,77 @@ class TelegramHandler:
             formatted_message = self._format_sv_message(content_type, content, metadata)
             
             # Parametri richiesta
-            payload = {
+            base_payload = {
                 'chat_id': self.chat_id,
                 'text': formatted_message,
                 'disable_web_page_preview': not self.sv_config['enable_preview'],
                 'disable_notification': silent
             }
-            
-            # Aggiungi parse_mode solo se specificato
-            if self.sv_config['parse_mode']:
-                payload['parse_mode'] = self.sv_config['parse_mode']
-            
-            # Send con retry logic
-            for attempt in range(self.sv_config['retry_attempts']):
-                try:
-                    response = requests.post(
-                        f"{self.base_url}/sendMessage",
-                        json=payload,
-                        timeout=self.sv_config['timeout']
-                    )
-                    
-                    if response.status_code == 200:
-                        result = response.json()
-                        if result.get('ok'):
-                            log.info(f"✅ [TELEGRAM] {content_type} message sent successfully")
-                            
-                            # Save message for ML analysis and coherence tracking
-                            self.save_message_for_analysis(content, content_type, metadata, result)
-                            
-                            return {
-                                'success': True,
-                                'message_id': result['result']['message_id'],
-                                'content_type': content_type,
-                                'timestamp': datetime.now().isoformat()
-                            }
-                        else:
-                            log.error(f"❌ [TELEGRAM] API Error: {result.get('description')}")
-                    else:
-                        log.error(f"❌ [TELEGRAM] HTTP Error: {response.status_code}")
-                
-                except requests.exceptions.RequestException as e:
-                    log.error(f"❌ [TELEGRAM] Network Error (attempt {attempt + 1}): {e}")
-                    
-                    if attempt < self.sv_config['retry_attempts'] - 1:
-                        time.sleep(self.sv_config['retry_delay'])
-                        continue
-            
-            # Fallimento dopo tutti i tentativi
-            return {
-                'success': False,
-                'error': 'Failed after all retry attempts',
-                'content_type': content_type,
-                'timestamp': datetime.now().isoformat()
-            }
+
+            parse_mode = self.sv_config.get('parse_mode')
+            if parse_mode:
+                base_payload['parse_mode'] = parse_mode
+
+            def _attempt_send(payload: Dict) -> Dict:
+                """Helper per inviare un payload e restituire il risultato."""
+                for attempt in range(self.sv_config['retry_attempts']):
+                    try:
+                        response = requests.post(
+                            f"{self.base_url}/sendMessage",
+                            json=payload,
+                            timeout=self.sv_config['timeout']
+                        )
+
+                        if response.status_code == 200:
+                            result = response.json()
+                            if result.get('ok'):
+                                log.info(f"✅ [TELEGRAM] {content_type} message sent successfully")
+
+                                # Save message for ML analysis and coherence tracking
+                                self.save_message_for_analysis(content, content_type, metadata, result)
+
+                                return {
+                                    'success': True,
+                                    'message_id': result['result']['message_id'],
+                                    'content_type': content_type,
+                                    'timestamp': datetime.now().isoformat()
+                                }
+
+                            description = result.get('description') or 'Unknown API error'
+                            log.error(f"❌ [TELEGRAM] API Error: {description}")
+                            return {'success': False, 'error': description}
+
+                        log.error(f"❌ [TELEGRAM] HTTP Error: {response.status_code} - {response.text}")
+
+                    except requests.exceptions.RequestException as e:
+                        log.error(f"❌ [TELEGRAM] Network Error (attempt {attempt + 1}): {e}")
+
+                        if attempt < self.sv_config['retry_attempts'] - 1:
+                            time.sleep(self.sv_config['retry_delay'])
+                            continue
+
+                return {
+                    'success': False,
+                    'error': 'Failed after all retry attempts',
+                    'content_type': content_type,
+                    'timestamp': datetime.now().isoformat()
+                }
+
+            # Primo tentativo: usa parse_mode se configurato
+            result = _attempt_send(base_payload)
+
+            # Se fallisce con errori di parsing, ritenta senza markup
+            if (
+                parse_mode
+                and not result.get('success')
+                and result.get('error')
+                and 'parse' in result['error'].lower()
+            ):
+                log.warning("[WARN] [TELEGRAM] Falling back to plain text (parse error detected)")
+                plain_payload = {k: v for k, v in base_payload.items() if k != 'parse_mode'}
+                result = _attempt_send(plain_payload)
+
+            return result
             
         except Exception as e:
             log.error(f"❌ [TELEGRAM] Unexpected error: {e}")

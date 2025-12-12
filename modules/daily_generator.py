@@ -32,13 +32,13 @@ except Exception:
     pass
 
 # Add project root to Python path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
 # Already in modules directory
 
 from config import sv_paths
 
-BACKUPS_DIR = Path(sv_paths.BACKUPS_DIR)
+CONFIG_DIR = Path(sv_paths.CONFIG_DIR)
 
 ITALY_TZ = pytz.timezone("Europe/Rome")
 GOLD_GRAMS_PER_TROY_OUNCE = 31.1035  # standard conversion factor
@@ -314,7 +314,7 @@ class DailyContentGenerator:
         self.session_tracker = daily_tracker if DEPENDENCIES_AVAILABLE else None
         
         # Setup directories for content storage and ML analysis
-        self.content_dir = BACKUPS_DIR / 'daily_content'
+        self.content_dir = CONFIG_DIR / 'daily_content'
         self.content_dir.mkdir(parents=True, exist_ok=True)
         self.reports_dir = Path(project_root) / 'reports' / '8_daily_content'
         self.reports_dir.mkdir(parents=True, exist_ok=True)
@@ -392,7 +392,7 @@ class DailyContentGenerator:
     def _load_recent_coherence_summary(self, now: datetime.datetime, history_days: int = 7) -> Dict[str, Any]:
         """Load recent multi-day coherence + accuracy summary from CoherenceManager history.
 
-        This reads config/backups/ml_analysis/coherence_history.json (if present) and
+        This reads config/ml_analysis/coherence_history.json (if present) and
         computes simple averages over the last `history_days` entries. It is
         intentionally offline-safe and will quietly degrade to a default dict
         when history is unavailable.
@@ -411,7 +411,7 @@ class DailyContentGenerator:
             import json as _json_local
 
             # History file is maintained by coherence_manager.run_daily_coherence_analysis
-            history_path = BACKUPS_DIR / 'ml_analysis' / 'coherence_history.json'
+            history_path = Path(sv_paths.ML_ANALYSIS_DIR) / 'coherence_history.json'
             if not history_path.exists():
                 return default
 

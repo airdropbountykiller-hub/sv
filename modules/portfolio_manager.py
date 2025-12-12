@@ -4,6 +4,7 @@ SV Portfolio Manager - $25K Initial Capital
 Tracks ML signals and calculates real P&L for dashboard display
 """
 
+from pathlib import Path
 import json
 import os
 from datetime import datetime, timedelta
@@ -20,7 +21,7 @@ class SVPortfolioManager:
 
     def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
         self.base_dir = base_dir
-        self.portfolio_file = portfolio_file or os.path.join(sv_paths.BACKUPS_DIR, 'portfolio_state.json')
+        self.portfolio_file = portfolio_file or sv_paths.PORTFOLIO_STATE_FILE
         self.history_dir = history_dir or os.path.join(base_dir, 'reports', 'portfolio_history')
 
         self.asset_clusters = {
@@ -603,7 +604,7 @@ class SVPortfolioManager:
 def get_portfolio_manager(base_dir: str = None) -> SVPortfolioManager:
     """Get portfolio manager instance"""
     if base_dir is None:
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        base_dir = Path(__file__).resolve().parent.parent
     
     return SVPortfolioManager(base_dir)
 

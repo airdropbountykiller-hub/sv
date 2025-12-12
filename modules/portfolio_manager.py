@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional
 import logging
 
 from config import sv_paths
+from modules.portfolio import AllocationPlanner, PortfolioStateBuilder, RiskManager, TradeExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,16 @@ class SVPortfolioManager:
             'SPY': 'equity', 'QQQ': 'equity', 'AAPL': 'equity', 'MSFT': 'equity',
             'EURUSD': 'fx', 'EURUSD=X': 'fx',
             'GOLD': 'commodities', 'XAUUSD=X': 'commodities',
+            'BND': 'bonds', 'LQD': 'bonds', 'IEF': 'bonds', 'TLT': 'bonds', 'AGG': 'bonds',
         }
+
+        self.allocation_planner = AllocationPlanner()
+        self.risk_manager = RiskManager()
+        self.trade_executor = TradeExecutor()
+        self.state_builder = PortfolioStateBuilder(
+            state_file=self.portfolio_file,
+            signals_file=sv_paths.PORTFOLIO_SIGNALS_FILE,
+        )
 
         self.broker_profiles = self._init_broker_profiles()
 
@@ -45,6 +55,7 @@ class SVPortfolioManager:
         os.makedirs(self.history_dir, exist_ok=True)
 
         self.portfolio = self._load_portfolio()
+        self._refresh_decision_layer()
 
     def _init_broker_profiles(self) -> Dict[str, Dict[str, Any]]:
         """Define broker-specific sizing/limit rules."""
@@ -187,6 +198,50 @@ class SVPortfolioManager:
         portfolio['brokers'] = brokers
         portfolio.setdefault('initial_capital', self.initial_capital)
         return portfolio
+
+    def _allocation_to_dict(self, allocation_result):
+        return {
+            'target_allocation_pct': allocation_result.target_allocation,
+            'exposure_by_class': {
+                k: round(v, 2) for k, v in allocation_result.exposure_by_class.items()
+            },
+            'exposure_pct': {
+                k: round(v, 2) for k, v in allocation_result.exposure_pct.items()
+            },
+            'deviations': {
+                k: round(v, 2) for k, v in allocation_result.deviations.items()
+            },
+            'recommended_trades': allocation_result.recommended_trades,
+        }
+
+    def _refresh_decision_layer(self):
+        """Compute allocation/risk state and write JSON outputs."""
+
+        allocation_result = self.allocation_planner.calculate_allocation(
+            positions=self.portfolio.get('active_positions', []),
+            cash_available=self.portfolio.get('available_cash', 0.0),
+            portfolio_balance=self.portfolio.get('current_balance', 0.0),
+            cluster_map=self.asset_clusters,
+        )
+
+        risk_snapshot = self.risk_manager.evaluate(
+            portfolio_balance=self.portfolio.get('current_balance', 0.0),
+            invested=self.portfolio.get('total_invested', 0.0),
+            cash_available=self.portfolio.get('available_cash', 0.0),
+            daily_balances=self.portfolio.get('daily_balances', []),
+        )
+
+        routed_trades = self.trade_executor.assign(allocation_result.recommended_trades)
+
+        decision_state = self.state_builder.build_state(
+            base_portfolio=self.portfolio,
+            allocation=self._allocation_to_dict(allocation_result),
+            risk=risk_snapshot.__dict__,
+            trades=routed_trades,
+        )
+
+        self.state_builder.build_signals(routed_trades)
+        self.portfolio['decision_layer'] = decision_state['decision_layer']
     
     def calculate_position_size(self, entry_price: float, stop_price: float,
                               confidence: int, broker: str) -> float:
@@ -486,6 +541,8 @@ class SVPortfolioManager:
             total_losses = abs(sum(p.get('final_pnl', 0) for p in losing_trades))
             if total_losses > 0:
                 metrics['profit_factor'] = total_wins / total_losses
+
+        self._refresh_decision_layer()
     
     def get_portfolio_snapshot(self) -> Dict[str, Any]:
         """Get current portfolio snapshot for dashboard"""
@@ -510,6 +567,7 @@ class SVPortfolioManager:
             'performance_metrics': self.portfolio['performance_metrics'],
             'positions': self.portfolio['active_positions'],
             'brokers': broker_snapshots,
+            'decision_layer': self.portfolio.get('decision_layer'),
         }
 
     def describe_configuration(self) -> Dict[str, Any]:

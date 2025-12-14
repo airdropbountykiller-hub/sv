@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SV Portfolio Manager - $25K Initial Capital
+SV Portfolio Manager - $10K Initial Capital
 Tracks ML signals and calculates real P&L for dashboard display
 """
 
@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional
 import logging
 
 from config import sv_paths
+from modules.portfolio.decision_layer import PortfolioDecisionLayer
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +28,10 @@ class SVPortfolioManager:
         self.asset_clusters = {
             'BTC': 'crypto', 'ETH': 'crypto', 'BNB': 'crypto', 'SOL': 'crypto',
             'ADA': 'crypto', 'XRP': 'crypto', 'DOT': 'crypto', 'LINK': 'crypto',
-            'SPX': 'indices', '^GSPC': 'indices', 'SP500': 'indices',
-            'SPY': 'equity', 'QQQ': 'equity', 'AAPL': 'equity', 'MSFT': 'equity',
+            'SPX': 'equity', '^GSPC': 'equity', 'SP500': 'equity', 'SPY': 'equity', 'QQQ': 'equity',
+            'AAPL': 'equity', 'MSFT': 'equity',
             'EURUSD': 'fx', 'EURUSD=X': 'fx',
-            'GOLD': 'commodities', 'XAUUSD=X': 'commodities',
+            'GOLD': 'equity', 'XAUUSD=X': 'equity',
         }
 
         self.broker_profiles = self._init_broker_profiles()
@@ -50,7 +51,7 @@ class SVPortfolioManager:
         """Define broker-specific sizing/limit rules."""
         return {
             'IG': {
-                'initial_capital': 10000.0,
+                'initial_capital': 5000.0,
                 'strategy': 'bot_trading',
                 'risk_per_trade': 0.02,
                 'max_position_size': 0.20,
@@ -80,7 +81,7 @@ class SVPortfolioManager:
                 'auto_trading': True,
             },
             'DIRECTA': {
-                'initial_capital': 5000.0,
+                'initial_capital': 0.0,
                 'strategy': 'long_term_equity',
                 'risk_per_trade': 0.01,
                 'max_position_size': 0.15,
@@ -90,7 +91,7 @@ class SVPortfolioManager:
                 'auto_trading': False,  # solo segnali discrezionali
             },
             'TRADE_REPUBLIC': {
-                'initial_capital': 5000.0,
+                'initial_capital': 0.0,
                 'strategy': 'long_term_equity',
                 'risk_per_trade': 0.01,
                 'max_position_size': 0.15,
@@ -177,7 +178,7 @@ class SVPortfolioManager:
                     'auto_trading': profile['auto_trading'],
                 }
             else:
-                brokers[name].setdefault('initial_capital', profile['initial_capital'])
+                brokers[name]['initial_capital'] = profile['initial_capital']
                 brokers[name].setdefault('available_cash', brokers[name]['initial_capital'])
                 brokers[name].setdefault('total_invested', 0.0)
                 brokers[name].setdefault('current_balance', brokers[name]['initial_capital'])
@@ -185,7 +186,7 @@ class SVPortfolioManager:
                 brokers[name].setdefault('strategy', profile['strategy'])
                 brokers[name].setdefault('auto_trading', profile['auto_trading'])
         portfolio['brokers'] = brokers
-        portfolio.setdefault('initial_capital', self.initial_capital)
+        portfolio['initial_capital'] = self.initial_capital
         return portfolio
     
     def calculate_position_size(self, entry_price: float, stop_price: float,
@@ -561,8 +562,20 @@ class SVPortfolioManager:
                 'snapshot': 'get_portfolio_snapshot for dashboards/telemetry',
                 'history': self.history_dir,
                 'configuration': 'describe_configuration and integration_overview for UI/help panels',
+                'signals': sv_paths.PORTFOLIO_SIGNALS_FILE,
             },
         }
+
+    def build_decision_outputs(
+        self,
+        signals: Optional[list] = None,
+        market_snapshot: Optional[Dict[str, Any]] = None,
+        price_history: Optional[Dict[str, list]] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        """Run the allocator → risk → executor pipeline and persist JSON outputs."""
+
+        decision_layer = PortfolioDecisionLayer(self)
+        return decision_layer.run(signals=signals, market_snapshot=market_snapshot, price_history=price_history)
     
     def save_daily_snapshot(self):
         """Save daily portfolio snapshot for historical tracking.

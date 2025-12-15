@@ -1,7 +1,13 @@
 # DIARIO DI BORDO - SV TRADING SYSTEM
 
 Data inizio: 2025-11-02
-Ultimo aggiornamento: 2025-11-24 09:30
+Ultimo aggiornamento: 2025-11-24 11:00
+
+## 🔄 Runtime Orchestrator & Scheduler - November 24, 2025
+- Nuovo `SVOrchestrator` in esecuzione continua (loop ~30s): consulta lo scheduler, attiva i trigger night/morning/weekly/monthly, scrive heartbeat periodici e tiene traccia degli errori per monitorare lo stato runtime.
+- Scheduler avanzato con calendario di mercato: pianificazioni per fascia oraria e per periodo (giornaliera, settimanale, mensile, trimestrale, semestrale), deduplica per periodo e persistenza dei flag su file di stato per ripartenze pulite.
+- Generatore giornaliero ampliato: combina emoji, news filtrate, calendario economico, segnali di momentum, gestione portafoglio e funzioni crypto live per coprire tutte le fasce orarie con dati reali.
+- Nuovo modulo PDF (ReportLab con grafici) e dashboard Flask: API/template pronti per prezzi crypto, snapshot di mercato e accuratezza previsioni; dashboard pronta a consumare il file `reports/metrics/live_state.json` come fonte leggera.
 
 ## 🆕 Daily/Weekly sync - November 24, 2025
 - Weekly report polishing stabile: rigenerazione rapida con `python "temp_tests/generate_weekly.py"` per validare layout e dati reali (PDF in `reports/2_weekly/`).

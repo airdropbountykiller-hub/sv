@@ -1,0 +1,33 @@
+# SV - Private Configuration Template
+# Copia questo file come 'private.txt' e inserisci i tuoi valori reali
+
+# === TELEGRAM CONFIGURATION ===
+# Ottieni il bot token da @BotFather su Telegram
+TELEGRAM_BOT_TOKEN=YOUR_BOT_TOKEN_HERE
+
+# Ottieni il chat ID dal tuo bot o canale
+TELEGRAM_CHAT_ID=YOUR_CHAT_ID_HERE
+
+# === API KEYS (Opzionali) ===
+# API keys per dati finanziari avanzati
+ALPHAVANTAGE_API_KEY=YOUR_ALPHAVANTAGE_KEY_HERE
+FINNHUB_API_KEY=YOUR_FINNHUB_KEY_HERE
+NEWSAPI_KEY=YOUR_NEWSAPI_KEY_HERE
+
+# === DATABASE (Futuro) ===
+# Configurazione database per analytics avanzate
+DATABASE_URL=sqlite:///sv_data.db
+
+# === GITHUB (Opzionale per backup) ===
+# Token per backup automatico su GitHub
+GITHUB_TOKEN=YOUR_GITHUB_TOKEN_HERE
+
+# === ALTRE CONFIGURAZIONI ===
+# Timezone per il sistema (default: Europe/Rome)
+TIMEZONE=Europe/Rome
+
+# Debug mode (true/false)
+DEBUG_MODE=false
+
+# Log level (INFO, DEBUG, WARNING, ERROR)
+LOG_LEVEL=INFO

@@ -94,6 +94,11 @@ def get_portfolio_state_file():
     return os.path.join(get_config_dir(), 'portfolio_state.json')
 
 
+def get_portfolio_signals_file():
+    """Operational signals file for the portfolio decision layer."""
+    return os.path.join(get_config_dir(), 'portfolio_signals.json')
+
+
 # Path constants
 PROJECT_ROOT = get_project_root()
 MODULES_DIR = get_modules_dir()
@@ -108,6 +113,7 @@ ML_ANALYSIS_DIR = get_ml_analysis_dir()
 PREVIEWS_DIR = get_preview_dir()
 FLAGS_FILE = get_flags_file()
 PORTFOLIO_STATE_FILE = get_portfolio_state_file()
+PORTFOLIO_SIGNALS_FILE = get_portfolio_signals_file()
 
 
 def setup_all_directories():

@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 class SVPortfolioManager:
     """Manages $10K simulated portfolio tracking ML signals."""
 
-    def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
         self.base_dir = base_dir
         self.portfolio_file = portfolio_file or sv_paths.PORTFOLIO_STATE_FILE
         self.history_dir = history_dir or os.path.join(base_dir, 'reports', 'portfolio_history')

@@ -1,0 +1,23 @@
+{
+  "target_allocations": {
+    "cash": 0.2,
+    "equity": 0.4,
+    "bonds": 0.2,
+    "crypto": 0.2
+  },
+  "rebalance": {
+    "monthly_day": 1,
+    "deviation_threshold": 0.1
+  },
+  "trade_thresholds": {
+    "min_notional": 100,
+    "min_score": 0.6
+  },
+  "brokers": {
+    "IG": {"auto_trading": true},
+    "BYBIT_BTC": {"auto_trading": true},
+    "BYBIT_USDT": {"auto_trading": true},
+    "DIRECTA": {"auto_trading": false},
+    "TRADE_REPUBLIC": {"auto_trading": false}
+  }
+}

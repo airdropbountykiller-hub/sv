@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class SVPortfolioManager:
-    """Manages $25K simulated portfolio tracking ML signals"""
+    """Manages $10K simulated portfolio tracking ML signals."""
 
     def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
         self.base_dir = base_dir
@@ -109,13 +109,27 @@ class SVPortfolioManager:
                 with open(self.portfolio_file, 'r', encoding='utf-8') as f:
                     portfolio = json.load(f)
                     portfolio = self._ensure_broker_state(portfolio)
-                    logger.info(f"Loaded portfolio: ${portfolio['current_balance']:.2f}")
+                    if portfolio.get('initial_capital') != self.initial_capital:
+                        logger.info(
+                            "Portfolio state uses legacy capital; resetting to $%s", self.initial_capital
+                        )
+                        portfolio = self._create_new_portfolio()
+                        self._save_portfolio(portfolio)
+                    else:
+                        logger.info(f"Loaded portfolio: ${portfolio['current_balance']:.2f}")
                     return portfolio
             except Exception as e:
                 logger.error(f"Error loading portfolio: {e}")
-        
-        # Create new portfolio
-        portfolio = {
+
+        portfolio = self._create_new_portfolio()
+        self._save_portfolio(portfolio)
+        logger.info(f"Created new portfolio: ${self.initial_capital}")
+        return portfolio
+
+    def _create_new_portfolio(self) -> Dict[str, Any]:
+        """Initialize a fresh portfolio using the configured broker profiles."""
+
+        return {
             "created_at": datetime.now().isoformat(),
             "initial_capital": self.initial_capital,
             "current_balance": self.initial_capital,
@@ -150,10 +164,6 @@ class SVPortfolioManager:
                 "sharpe_ratio": None
             }
         }
-
-        self._save_portfolio(portfolio)
-        logger.info(f"Created new portfolio: ${self.initial_capital}")
-        return portfolio
     
     def _save_portfolio(self, portfolio: Dict[str, Any]):
         """Save portfolio state to disk"""

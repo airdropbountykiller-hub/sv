@@ -745,10 +745,17 @@ class SVPortfolioManager:
 
 def get_portfolio_manager(base_dir: str = None) -> SVPortfolioManager:
     """Get portfolio manager instance"""
+    global allow_manual_brokers
+
     if base_dir is None:
         base_dir = Path(__file__).resolve().parent.parent
-    
-    return SVPortfolioManager(base_dir)
+
+    # Defensive guard: some legacy runtimes may import this helper without
+    # importing the module-level toggle, so recreate it on demand.
+    if "allow_manual_brokers" not in globals():
+        allow_manual_brokers = ALLOW_MANUAL_BROKERS_DEFAULT
+
+    return SVPortfolioManager(base_dir, allow_manual_brokers=allow_manual_brokers)
 
 
 if __name__ == "__main__":

@@ -94,11 +94,11 @@ except ImportError as e:
     log.warning(f"[WARN] [DAILY-GEN] Regime manager not available: {e}")
     REGIME_MANAGER_AVAILABLE = False
 
-# Portfolio Manager for $25K tracking (v1.5.0)
+# Portfolio Manager for $10K tracking (v1.5.0)
 try:
     from modules.portfolio_manager import get_portfolio_manager
     PORTFOLIO_MANAGER_AVAILABLE = True
-    log.info("[OK] [PORTFOLIO-MANAGER] $25K portfolio tracking system loaded")
+    log.info("[OK] [PORTFOLIO-MANAGER] $10K portfolio tracking system loaded")
 except ImportError as e:
     log.warning(f"[WARN] [DAILY-GEN] Portfolio manager not available: {e}")
     PORTFOLIO_MANAGER_AVAILABLE = False
@@ -725,7 +725,7 @@ class DailyContentGenerator:
         - compact BTC/SPX/EURUSD/GOLD snapshot (ENGINE),
         - live evaluation of predictions (BRAIN-lite),
         - regime + tomorrow bias via DailyRegimeManager,
-        - optional $25K portfolio/risk snapshot when PortfolioManager is available,
+        - optional $10K portfolio/risk snapshot when PortfolioManager is available,
         - streaming `live_state.json` for dashboard consumption.
 
         No Telegram messages are generated and no content files are modified.

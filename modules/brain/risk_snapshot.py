@@ -15,7 +15,7 @@ from modules.daily_generator import project_root
 def enrich_with_risk(prediction_eval: Dict[str, Any], assets: Dict[str, Any]) -> Dict[str, Any]:
     """Enrich prediction_eval with portfolio risk snapshot when available.
 
-    Uses the shared $25K portfolio manager. Any error is swallowed so that
+    Uses the shared $10K portfolio manager. Any error is swallowed so that
     callers remain non-blocking.
     """
     try:

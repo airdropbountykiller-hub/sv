@@ -133,7 +133,7 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
     - arricchisce `prediction_eval` con:
       - `signals`: `{hits, misses, pending, total_tracked, accuracy_pct}` derivati da `_evaluate_predictions_with_live_data()`,
       - `regime`: stato corrente (`risk_on`/`risk_off`/`neutral`/`transitioning`), grade di accuracy e `tomorrow_bias` dal `DailyRegimeManager`,
-      - `risk`: snapshot del portafoglio $25K (`current_balance`, `total_pnl`, `total_pnl_pct`, `active_positions`, `win_rate`, `max_drawdown`, `sharpe_ratio`) più placeholder intraday (`pnl`, `pnl_pct`, `var_95`, ecc. a `None`).
+      - `risk`: snapshot del portafoglio $10K (`current_balance`, `total_pnl`, `total_pnl_pct`, `active_positions`, `win_rate`, `max_drawdown`, `sharpe_ratio`) più placeholder intraday (`pnl`, `pnl_pct`, `var_95`, ecc. a `None`).
     - crea/aggiorna `reports/metrics/live_state.json` con un JSON compatto:
       - `date`, `timestamp`,
       - `sentiment` intraday più recente,
@@ -239,14 +239,14 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 
 - Rendere la dashboard più utile per il monitoraggio intraday reale:
   - mostrare accuracy live e stato delle previsioni,
-  - tracciare un portafoglio simulato $25K collegato ai segnali ML,
+  - tracciare un portafoglio simulato $10K collegato ai segnali ML,
   - esporre una timeline intraday delle 5 fasi (Press → Morning → Noon → Evening → Summary).
 
 ### Implementazione
 
 - **File aggiornati**:
   - `modules/sv_dashboard.py` → nuovi endpoint API + integrazione con `daily_generator` e `portfolio_manager`.
-  - `modules/portfolio_manager.py` → confermata gestione portafoglio $25K con metriche di performance.
+- `modules/portfolio_manager.py` → confermata gestione portafoglio $10K con metriche di performance.
 
 - **Endpoint core (ML & segnali)**
   - `/api/ml`:
@@ -261,11 +261,11 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
     - raggruppa i risultati giornalieri per asset,
     - calcola un `hit_rate` per asset (BTC, SPX, EURUSD, GOLD, ecc.) per pannello "Signals by Asset".
 
-- **Endpoint portafoglio ($25K simulated)**
-  - `/api/portfolio_snapshot`:
-    - utilizza `get_portfolio_manager(BASE_DIR)` e `get_key_assets_prices()` per aggiornare le posizioni attive,
-    - restituisce `current_balance`, `total_pnl`, `total_pnl_pct`, `available_cash`, `total_invested` e `performance_metrics` (win_rate, avg_win/loss, profit_factor, max_drawdown, sharpe_ratio),
-    - aggiunge `initial_capital = 25000` e `timestamp` per il pannello principale della dashboard.
+- **Endpoint portafoglio ($10K simulated)**
+    - `/api/portfolio_snapshot`:
+      - utilizza `get_portfolio_manager(BASE_DIR)` e `get_key_assets_prices()` per aggiornare le posizioni attive,
+      - restituisce `current_balance`, `total_pnl`, `total_pnl_pct`, `available_cash`, `total_invested` e `performance_metrics` (win_rate, avg_win/loss, profit_factor, max_drawdown, sharpe_ratio),
+      - aggiunge `initial_capital = 10000` e `timestamp` per il pannello principale della dashboard.
   - `/api/portfolio_positions`:
     - espone l’elenco delle posizioni attive con: asset, direction, entry/target/stop, units, position_size, current_price, current_pnl, pnl_percentage, max_favorable/max_adverse, status.
 
@@ -287,7 +287,7 @@ Iniziate le migliorie strutturate del sistema SV secondo il piano in 3 fasi:
 
 - Dashboard ora offre:
   - pannello ML con accuracy intraday reale e breakdown per asset;
-  - pannello portafoglio $25K con snapshot aggiornato e lista posizioni;
+  - pannello portafoglio $10K con snapshot aggiornato e lista posizioni;
   - timeline intraday delle 5 fasi principale basata su `engine_YYYY-MM-DD.json` e heartbeat v2;
   - pieno allineamento con i vincoli globali: nessun numero inventato, Gold sempre in USD/grammo, regime e segnali coerenti con le metriche reali.
 ---
@@ -482,7 +482,7 @@ Totale stimato: **~10–14h** di lavoro effettivo, spezzato in 3–4 sessioni, c
     - `modules/engine/heartbeat.py` → `run_heartbeat(now)` è l’entrypoint ufficiale ENGINE; crea `_DailyGenerator()` e chiama `run_engine_brain_heartbeat(now)`.
     - `modules/brain/prediction_eval.py` → `evaluate_predictions(now)` incapsula `_DailyGenerator()._evaluate_predictions_with_live_data(now)`.
     - `modules/brain/regime_detection.py` → `enrich_with_regime(prediction_eval, sentiment_payload)` aggiorna `prediction_eval['regime']` usando `DailyRegimeManager`.
-    - `modules/brain/risk_snapshot.py` → `enrich_with_risk(prediction_eval, assets)` allega a `prediction_eval['risk']` il `portfolio_snapshot` del portafoglio $25K.
+    - `modules/brain/risk_snapshot.py` → `enrich_with_risk(prediction_eval, assets)` allega a `prediction_eval['risk']` il `portfolio_snapshot` del portafoglio $10K.
   - `modules/daily_generator.py`:
     - `run_engine_brain_heartbeat(self, now)` ora importa e usa `get_market_snapshot`, `evaluate_predictions`, `enrich_with_regime`, `enrich_with_risk` (ENGINE/BRAIN) mantenendo invariati:
       - struttura e contenuto di `engine_YYYY-MM-DD.json` (stages + prediction_eval.signals/regime/risk),

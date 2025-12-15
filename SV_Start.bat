@@ -68,7 +68,7 @@ echo   SV v1.4.0 - FULLY OPERATIONAL
 
 echo   Dashboard: http://localhost:5000
 
-echo   Content: 21 messages/day (5 types)
+echo   Content: 27 messages/day (8 types)
 
 echo   Language: Complete English System
 
@@ -84,8 +84,8 @@ REM === CONTROL MENU (Unified) ===
 echo.
 echo ================== SV - CONTROL MENU ==================
 echo  1) Run Single Check (one cycle now)
-echo  2) Manual Send (safe)     [press_review|morning|noon|evening|summary]
-echo  3) Manual Send (FORCE)    [press_review|morning|noon|evening|summary]
+echo  2) Manual Send (safe)     [night^|late_night^|press_review^|morning^|noon^|afternoon^|evening^|summary]
+echo  3) Manual Send (FORCE)    [night^|late_night^|press_review^|morning^|noon^|afternoon^|evening^|summary]
 echo  4) Send saved JSON(s) via Telegram (paths separated by space)
 echo  5) Open reports folder
 echo  Q) Quit (orchestrator/dashboard stay running)
@@ -109,14 +109,14 @@ pause
 goto menu
 
 :manual_safe
-set /p TYPE=Content type [press_review|morning|noon|evening|summary]: 
+set /p TYPE=Content type [night^|late_night^|press_review^|morning^|noon^|afternoon^|evening^|summary]: 
 echo Sending %TYPE% (safe mode, respects scheduler and marks sent)...
 python "modules\manual_sender.py" %TYPE%
 pause
 goto menu
 
 :manual_force
-set /p TYPE=Content type [press_review|morning|noon|evening|summary]: 
+set /p TYPE=Content type [night^|late_night^|press_review^|morning^|noon^|afternoon^|evening^|summary]: 
 echo WARNING: FORCE mode may duplicate later via orchestrator. Consider avoiding for production.
 echo Sending %TYPE% (FORCE mode)...
 python "modules\manual_sender.py" %TYPE% --force

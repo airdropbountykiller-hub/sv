@@ -1,36 +1,73 @@
 #!/usr/bin/env python3
 """
-SV Portfolio Manager - $25K Initial Capital
+SV Portfolio Manager - $10K Initial Capital
 Tracks ML signals and calculates real P&L for dashboard display
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 import json
 import os
+import shutil
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 import logging
 
 from config import sv_paths
+from modules.portfolio.decision_layer import PortfolioDecisionLayer
+
+# Backward-compatible module-level toggle so older callers that referenced a
+# bare ``allow_manual_brokers`` variable instead of the instance attribute keep
+# working without raising NameError when the dashboard hits the portfolio API.
+ALLOW_MANUAL_BROKERS_DEFAULT = os.getenv("SV_PORTFOLIO_ALLOW_MANUAL_BROKERS", "1") == "1"
+allow_manual_brokers = ALLOW_MANUAL_BROKERS_DEFAULT
+
+__all__ = [
+    "SVPortfolioManager",
+    "get_portfolio_manager",
+    "allow_manual_brokers",
+    "ALLOW_MANUAL_BROKERS_DEFAULT",
+]
 
 logger = logging.getLogger(__name__)
 
 
 class SVPortfolioManager:
-    """Manages $25K simulated portfolio tracking ML signals"""
+    """Manages $10K simulated portfolio tracking ML signals."""
 
-    def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
+    def __init__(
+        self,
+        base_dir: str,
+        portfolio_file: Optional[str] = None,
+        history_dir: Optional[str] = None,
+        *,
+        allow_manual_brokers: bool | None = None,
+        force_reset: bool | None = None,
+    ):
         self.base_dir = base_dir
         self.portfolio_file = portfolio_file or sv_paths.PORTFOLIO_STATE_FILE
         self.history_dir = history_dir or os.path.join(base_dir, 'reports', 'portfolio_history')
+        manual_default = allow_manual_brokers if allow_manual_brokers is not None else ALLOW_MANUAL_BROKERS_DEFAULT
+        self.allow_manual_brokers = manual_default
+        self.force_reset = bool(
+            force_reset
+            if force_reset is not None
+            else os.getenv("SV_PORTFOLIO_RESET", "0") == "1"
+        )
+
+        # Default cost assumptions (can be overridden per broker profile)
+        self.default_fee_rate = 0.001  # 10 bps round-turn assumption
+        self.default_tax_rate = 0.26   # Italian capital gains default
 
         self.asset_clusters = {
             'BTC': 'crypto', 'ETH': 'crypto', 'BNB': 'crypto', 'SOL': 'crypto',
             'ADA': 'crypto', 'XRP': 'crypto', 'DOT': 'crypto', 'LINK': 'crypto',
-            'SPX': 'indices', '^GSPC': 'indices', 'SP500': 'indices',
-            'SPY': 'equity', 'QQQ': 'equity', 'AAPL': 'equity', 'MSFT': 'equity',
+            'SPX': 'equity', '^GSPC': 'equity', 'SP500': 'equity', 'SPY': 'equity', 'QQQ': 'equity',
+            'AAPL': 'equity', 'MSFT': 'equity',
+            'BND': 'bonds', 'AGG': 'bonds', 'TLT': 'bonds', 'IEF': 'bonds',
             'EURUSD': 'fx', 'EURUSD=X': 'fx',
-            'GOLD': 'commodities', 'XAUUSD=X': 'commodities',
+            'GOLD': 'equity', 'XAUUSD=X': 'equity',
         }
 
         self.broker_profiles = self._init_broker_profiles()
@@ -50,7 +87,7 @@ class SVPortfolioManager:
         """Define broker-specific sizing/limit rules."""
         return {
             'IG': {
-                'initial_capital': 10000.0,
+                'initial_capital': 5000.0,
                 'strategy': 'bot_trading',
                 'risk_per_trade': 0.02,
                 'max_position_size': 0.20,
@@ -58,6 +95,8 @@ class SVPortfolioManager:
                 'max_trades_per_asset': 2,
                 'cluster_limits': {'indices': 0.6, 'fx': 0.25, 'commodities': 0.2},
                 'auto_trading': True,
+                'fee_rate': 0.0005,
+                'tax_rate': self.default_tax_rate,
             },
             'BYBIT_BTC': {
                 'initial_capital': 2500.0,
@@ -68,6 +107,8 @@ class SVPortfolioManager:
                 'max_trades_per_asset': 2,
                 'cluster_limits': {'crypto': 1.0},
                 'auto_trading': True,
+                'fee_rate': 0.0007,
+                'tax_rate': self.default_tax_rate,
             },
             'BYBIT_USDT': {
                 'initial_capital': 2500.0,
@@ -78,9 +119,11 @@ class SVPortfolioManager:
                 'max_trades_per_asset': 2,
                 'cluster_limits': {'crypto': 1.0},
                 'auto_trading': True,
+                'fee_rate': 0.0007,
+                'tax_rate': self.default_tax_rate,
             },
             'DIRECTA': {
-                'initial_capital': 5000.0,
+                'initial_capital': 0.0,
                 'strategy': 'long_term_equity',
                 'risk_per_trade': 0.01,
                 'max_position_size': 0.15,
@@ -88,9 +131,11 @@ class SVPortfolioManager:
                 'max_trades_per_asset': 1,
                 'cluster_limits': {'equity': 1.0},
                 'auto_trading': False,  # solo segnali discrezionali
+                'fee_rate': 0.001,
+                'tax_rate': self.default_tax_rate,
             },
             'TRADE_REPUBLIC': {
-                'initial_capital': 5000.0,
+                'initial_capital': 0.0,
                 'strategy': 'long_term_equity',
                 'risk_per_trade': 0.01,
                 'max_position_size': 0.15,
@@ -98,23 +143,46 @@ class SVPortfolioManager:
                 'max_trades_per_asset': 1,
                 'cluster_limits': {'equity': 1.0},
                 'auto_trading': False,  # solo segnali discrezionali
+                'fee_rate': 0.001,
+                'tax_rate': self.default_tax_rate,
             },
         }
     
     def _load_portfolio(self) -> Dict[str, Any]:
         """Load portfolio state from disk or create new one"""
+        if self.force_reset:
+            portfolio = self._create_new_portfolio()
+            self._save_portfolio(portfolio)
+            return portfolio
+
         if os.path.exists(self.portfolio_file):
             try:
                 with open(self.portfolio_file, 'r', encoding='utf-8') as f:
                     portfolio = json.load(f)
                     portfolio = self._ensure_broker_state(portfolio)
-                    logger.info(f"Loaded portfolio: ${portfolio['current_balance']:.2f}")
+                    self.portfolio = portfolio
+                    self._update_portfolio_metrics()
+                    if portfolio.get('initial_capital') != self.initial_capital:
+                        logger.info(
+                            "Portfolio state uses legacy capital; resetting to $%s", self.initial_capital
+                        )
+                        portfolio = self._create_new_portfolio()
+                        self._save_portfolio(portfolio)
+                    else:
+                        logger.info(f"Loaded portfolio: ${portfolio['current_balance']:.2f}")
                     return portfolio
             except Exception as e:
                 logger.error(f"Error loading portfolio: {e}")
-        
-        # Create new portfolio
-        portfolio = {
+
+        portfolio = self._create_new_portfolio()
+        self._save_portfolio(portfolio)
+        logger.info(f"Created new portfolio: ${self.initial_capital}")
+        return portfolio
+
+    def _create_new_portfolio(self) -> Dict[str, Any]:
+        """Initialize a fresh portfolio using the configured broker profiles."""
+
+        return {
             "created_at": datetime.now().isoformat(),
             "initial_capital": self.initial_capital,
             "current_balance": self.initial_capital,
@@ -122,9 +190,12 @@ class SVPortfolioManager:
             "total_invested": 0.0,
             "total_pnl": 0.0,
             "total_pnl_pct": 0.0,
+            "total_fees_paid": 0.0,
+            "total_estimated_taxes": 0.0,
             "active_positions": [],
             "closed_positions": [],
             "daily_balances": [],
+            "backtest_manual_trading": self.allow_manual_brokers,
             "brokers": {
                 name: {
                     'initial_capital': profile['initial_capital'],
@@ -134,6 +205,8 @@ class SVPortfolioManager:
                     'realized_pnl': 0.0,
                     'strategy': profile['strategy'],
                     'auto_trading': profile['auto_trading'],
+                    'fees_paid': 0.0,
+                    'taxes_accrued': 0.0,
                 }
                 for name, profile in self.broker_profiles.items()
             },
@@ -149,10 +222,6 @@ class SVPortfolioManager:
                 "sharpe_ratio": None
             }
         }
-
-        self._save_portfolio(portfolio)
-        logger.info(f"Created new portfolio: ${self.initial_capital}")
-        return portfolio
     
     def _save_portfolio(self, portfolio: Dict[str, Any]):
         """Save portfolio state to disk"""
@@ -161,6 +230,36 @@ class SVPortfolioManager:
                 json.dump(portfolio, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.error(f"Error saving portfolio: {e}")
+
+    def reset_portfolio(
+        self,
+        *,
+        reset_history: bool = False,
+        include_manual_brokers: bool | None = None,
+    ) -> Dict[str, Any]:
+        """Force a fresh portfolio starting now with optional manual broker toggle.
+
+        Args:
+            reset_history: if True, clears saved daily history files.
+            include_manual_brokers: override the current manual broker toggle so
+                backtests can explicitly include discretionary accounts.
+        """
+
+        if include_manual_brokers is not None:
+            self.allow_manual_brokers = include_manual_brokers
+
+        self.portfolio = self._create_new_portfolio()
+        self._save_portfolio(self.portfolio)
+
+        if reset_history and os.path.isdir(self.history_dir):
+            try:
+                shutil.rmtree(self.history_dir)
+                os.makedirs(self.history_dir, exist_ok=True)
+            except Exception as exc:
+                logger.error(f"Error clearing history: {exc}")
+
+        logger.info("Portfolio reset to fresh state (%s)", self.portfolio.get('created_at'))
+        return self.portfolio
 
     def _ensure_broker_state(self, portfolio: Dict[str, Any]) -> Dict[str, Any]:
         """Backfill broker-specific state for legacy portfolio files."""
@@ -175,17 +274,24 @@ class SVPortfolioManager:
                     'realized_pnl': 0.0,
                     'strategy': profile['strategy'],
                     'auto_trading': profile['auto_trading'],
+                    'fees_paid': 0.0,
+                    'taxes_accrued': 0.0,
                 }
             else:
-                brokers[name].setdefault('initial_capital', profile['initial_capital'])
+                brokers[name]['initial_capital'] = profile['initial_capital']
                 brokers[name].setdefault('available_cash', brokers[name]['initial_capital'])
                 brokers[name].setdefault('total_invested', 0.0)
                 brokers[name].setdefault('current_balance', brokers[name]['initial_capital'])
                 brokers[name].setdefault('realized_pnl', 0.0)
                 brokers[name].setdefault('strategy', profile['strategy'])
                 brokers[name].setdefault('auto_trading', profile['auto_trading'])
+                brokers[name].setdefault('fees_paid', 0.0)
+                brokers[name].setdefault('taxes_accrued', 0.0)
         portfolio['brokers'] = brokers
-        portfolio.setdefault('initial_capital', self.initial_capital)
+        portfolio['initial_capital'] = self.initial_capital
+        portfolio.setdefault('total_fees_paid', 0.0)
+        portfolio.setdefault('total_estimated_taxes', 0.0)
+        portfolio.setdefault('backtest_manual_trading', self.allow_manual_brokers)
         return portfolio
     
     def calculate_position_size(self, entry_price: float, stop_price: float,
@@ -249,8 +355,10 @@ class SVPortfolioManager:
                 logger.warning(f"Unknown broker '{broker}' in prediction; skipping trade")
                 return None
 
-            if not broker_profile.get('auto_trading', True):
-                logger.info(f"Broker {broker} is configured for discretionary trading only; ignoring bot signal")
+            if not broker_profile.get('auto_trading', True) and not self.allow_manual_brokers:
+                logger.info(
+                    f"Broker {broker} is configured for discretionary trading only; ignoring bot signal"
+                )
                 return None
 
             broker_positions = [p for p in self.portfolio['active_positions'] if p.get('broker') == broker]
@@ -295,6 +403,9 @@ class SVPortfolioManager:
             # Create position ID
             position_id = f"{asset}_{direction}_{broker}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
+            fee_rate = broker_profile.get('fee_rate', self.default_fee_rate)
+            entry_fee = position_size * fee_rate
+
             # Create position object
             position = {
                 "id": position_id,
@@ -310,15 +421,19 @@ class SVPortfolioManager:
                 "entry_time": datetime.now().isoformat(),
                 "status": "ACTIVE",
                 "current_price": live_price,
-                "current_pnl": 0.0,
+                "current_pnl": -round(entry_fee, 2),
                 "pnl_percentage": 0.0,
                 "max_favorable": 0.0,
-                "max_adverse": 0.0
+                "max_adverse": 0.0,
+                "entry_fee": round(entry_fee, 2),
+                "estimated_tax_rate": broker_profile.get('tax_rate', self.default_tax_rate),
             }
 
             # Update portfolio
             self.portfolio['active_positions'].append(position)
             broker_state['available_cash'] -= position_size
+            broker_state['available_cash'] -= entry_fee
+            broker_state['fees_paid'] = broker_state.get('fees_paid', 0) + entry_fee
             broker_state['total_invested'] += position_size
 
             self._update_portfolio_metrics()
@@ -359,7 +474,9 @@ class SVPortfolioManager:
                 pnl = (current_price - entry_price) * units
             else:  # SHORT
                 pnl = (entry_price - current_price) * units
-            
+
+            pnl -= position.get('entry_fee', 0)
+
             position['current_pnl'] = round(pnl, 2)
             position['pnl_percentage'] = round((pnl / position['position_size']) * 100, 2)
             
@@ -401,18 +518,32 @@ class SVPortfolioManager:
         entry_price = position['entry_price']
         units = position['units']
         direction = position['direction']
-        
+
         if direction.upper() == 'LONG':
             pnl = (close_price - entry_price) * units
         else:  # SHORT
             pnl = (entry_price - close_price) * units
-        
+
+        broker_name = position.get('broker', 'IG')
+        broker_profile = self.broker_profiles.get(broker_name, {})
+        fee_rate = broker_profile.get('fee_rate', self.default_fee_rate)
+        exit_fee = close_price * units * fee_rate
+        total_fees = position.get('entry_fee', 0.0) + exit_fee
+
+        taxable_profit = max(pnl - total_fees, 0)
+        tax_rate = broker_profile.get('tax_rate', self.default_tax_rate)
+        estimated_taxes = taxable_profit * tax_rate
+        net_pnl = pnl - total_fees - estimated_taxes
+
         # Update position for history
         position.update({
             'close_price': close_price,
             'close_time': datetime.now().isoformat(),
-            'final_pnl': round(pnl, 2),
-            'final_pnl_pct': round((pnl / position['position_size']) * 100, 2),
+            'final_pnl': round(net_pnl, 2),
+            'gross_pnl': round(pnl, 2),
+            'fees_paid': round(total_fees, 2),
+            'estimated_taxes': round(estimated_taxes, 2),
+            'final_pnl_pct': round((net_pnl / position['position_size']) * 100, 2),
             'close_reason': reason,
             'status': 'CLOSED'
         })
@@ -422,9 +553,17 @@ class SVPortfolioManager:
 
         # Update portfolio
         self.portfolio['closed_positions'].append(position)
-        broker_state['available_cash'] = broker_state.get('available_cash', 0) + position['position_size'] + pnl
+        broker_state['available_cash'] = (
+            broker_state.get('available_cash', 0)
+            + position['position_size']
+            + pnl
+            - exit_fee
+            - estimated_taxes
+        )
         broker_state['total_invested'] = max(0.0, broker_state.get('total_invested', 0) - position['position_size'])
-        broker_state['realized_pnl'] = broker_state.get('realized_pnl', 0) + pnl
+        broker_state['realized_pnl'] = broker_state.get('realized_pnl', 0) + net_pnl
+        broker_state['fees_paid'] = broker_state.get('fees_paid', 0) + total_fees
+        broker_state['taxes_accrued'] = broker_state.get('taxes_accrued', 0) + estimated_taxes
         
         # Update performance metrics
         self.portfolio['performance_metrics']['total_trades'] += 1
@@ -449,8 +588,13 @@ class SVPortfolioManager:
             open_positions = [p for p in self.portfolio['active_positions'] if p.get('broker') == broker_name]
             broker_state['total_invested'] = sum(p.get('position_size', 0) for p in open_positions)
             open_pnl = sum(p.get('current_pnl', 0) for p in open_positions)
-            closed_pnl_broker = sum(p.get('final_pnl', 0) for p in self.portfolio['closed_positions'] if p.get('broker') == broker_name)
+            closed_positions = [p for p in self.portfolio['closed_positions'] if p.get('broker') == broker_name]
+            closed_pnl_broker = sum(p.get('final_pnl', 0) for p in closed_positions)
             broker_state['realized_pnl'] = closed_pnl_broker
+            broker_state['fees_paid'] = sum(p.get('fees_paid', 0) for p in closed_positions) + sum(
+                p.get('entry_fee', 0) for p in open_positions
+            )
+            broker_state['taxes_accrued'] = sum(p.get('estimated_taxes', 0) for p in closed_positions)
             broker_state['current_balance'] = broker_state.get('available_cash', 0) + broker_state['total_invested'] + open_pnl
 
         self.portfolio['available_cash'] = sum(b.get('available_cash', 0) for b in self.portfolio['brokers'].values())
@@ -461,6 +605,11 @@ class SVPortfolioManager:
             self.portfolio['total_invested'] +
             active_pnl
         )
+
+        self.portfolio['total_fees_paid'] = round(sum(b.get('fees_paid', 0) for b in self.portfolio['brokers'].values()), 2)
+        self.portfolio['total_estimated_taxes'] = round(sum(
+            b.get('taxes_accrued', 0) for b in self.portfolio['brokers'].values()
+        ), 2)
 
         self.portfolio['total_pnl'] = active_pnl + closed_pnl
         self.portfolio['total_pnl_pct'] = (self.portfolio['total_pnl'] / self.initial_capital) * 100
@@ -496,6 +645,8 @@ class SVPortfolioManager:
                 'available_cash': round(state.get('available_cash', 0), 2),
                 'invested': round(state.get('total_invested', 0), 2),
                 'realized_pnl': round(state.get('realized_pnl', 0), 2),
+                'fees_paid': round(state.get('fees_paid', 0), 2),
+                'taxes_accrued': round(state.get('taxes_accrued', 0), 2),
                 'strategy': state.get('strategy'),
                 'auto_trading': state.get('auto_trading', True),
             }
@@ -506,10 +657,13 @@ class SVPortfolioManager:
             'total_invested': round(self.portfolio['total_invested'], 2),
             'total_pnl': round(self.portfolio['total_pnl'], 2),
             'total_pnl_pct': round(self.portfolio['total_pnl_pct'], 2),
+            'total_fees_paid': round(self.portfolio.get('total_fees_paid', 0), 2),
+            'total_estimated_taxes': round(self.portfolio.get('total_estimated_taxes', 0), 2),
             'active_positions': len(self.portfolio['active_positions']),
             'performance_metrics': self.portfolio['performance_metrics'],
             'positions': self.portfolio['active_positions'],
             'brokers': broker_snapshots,
+            'manual_trading_allowed': self.allow_manual_brokers,
         }
 
     def describe_configuration(self) -> Dict[str, Any]:
@@ -520,6 +674,8 @@ class SVPortfolioManager:
             brokers[name] = {
                 'strategy': profile.get('strategy'),
                 'auto_trading': profile.get('auto_trading', True),
+                'fee_rate': profile.get('fee_rate', self.default_fee_rate),
+                'tax_rate': profile.get('tax_rate', self.default_tax_rate),
                 'risk_per_trade': profile.get('risk_per_trade', self.risk_per_trade),
                 'max_position_size': profile.get('max_position_size', self.max_position_size),
                 'max_open_trades': profile.get('max_open_trades'),
@@ -530,6 +686,7 @@ class SVPortfolioManager:
         return {
             'initial_capital': self.initial_capital,
             'asset_clusters': self.asset_clusters,
+            'allow_manual_brokers': self.allow_manual_brokers,
             'brokers': brokers,
         }
 
@@ -561,8 +718,20 @@ class SVPortfolioManager:
                 'snapshot': 'get_portfolio_snapshot for dashboards/telemetry',
                 'history': self.history_dir,
                 'configuration': 'describe_configuration and integration_overview for UI/help panels',
+                'signals': sv_paths.PORTFOLIO_SIGNALS_FILE,
             },
         }
+
+    def build_decision_outputs(
+        self,
+        signals: Optional[list] = None,
+        market_snapshot: Optional[Dict[str, Any]] = None,
+        price_history: Optional[Dict[str, list]] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        """Run the allocator → risk → executor pipeline and persist JSON outputs."""
+
+        decision_layer = PortfolioDecisionLayer(self)
+        return decision_layer.run(signals=signals, market_snapshot=market_snapshot, price_history=price_history)
     
     def save_daily_snapshot(self):
         """Save daily portfolio snapshot for historical tracking.
@@ -603,10 +772,17 @@ class SVPortfolioManager:
 
 def get_portfolio_manager(base_dir: str = None) -> SVPortfolioManager:
     """Get portfolio manager instance"""
+    global allow_manual_brokers
+
     if base_dir is None:
         base_dir = Path(__file__).resolve().parent.parent
-    
-    return SVPortfolioManager(base_dir)
+
+    # Defensive guard: some legacy runtimes may import this helper without
+    # importing the module-level toggle, so recreate it on demand.
+    if "allow_manual_brokers" not in globals():
+        allow_manual_brokers = ALLOW_MANUAL_BROKERS_DEFAULT
+
+    return SVPortfolioManager(base_dir, allow_manual_brokers=allow_manual_brokers)
 
 
 if __name__ == "__main__":

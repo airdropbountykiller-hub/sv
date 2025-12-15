@@ -530,6 +530,10 @@ def get_ml():
                 kp = key_prices.get('EURUSD', {})
                 current_price = kp.get('price', 0)
                 price_change = kp.get('change_pct', 0)
+            elif asset == 'GOLD':
+                kp = key_prices.get('GOLD', {})
+                current_price = kp.get('price', 0)
+                price_change = kp.get('change_pct', 0)
             
             # Calculate prediction accuracy
             accuracy_info = calculate_prediction_accuracy(pred, current_price)
@@ -553,6 +557,31 @@ def get_ml():
                 'risk_reward': abs(target - entry) / abs(entry - stop) if stop != entry else 1
             })
         
+        # Add baseline tracking for key assets even when predictions are missing
+        required_assets = {'BTC', 'SPX', 'EURUSD', 'GOLD'}
+        present_assets = set(p['asset'] for p in prediction_analysis)
+
+        for asset in sorted(required_assets - present_assets):
+            price_info = key_prices.get(asset, {}) or crypto_prices.get(asset, {})
+            current_price = price_info.get('price', 0)
+            price_change = price_info.get('change_pct', 0)
+
+            prediction_analysis.append({
+                'asset': asset,
+                'direction': 'HOLD',
+                'entry': current_price,
+                'target': current_price,
+                'stop': current_price,
+                'confidence': 0,
+                'current_price': current_price,
+                'price_change_24h': price_change,
+                'accuracy': 0,
+                'status': 'DATA ONLY',
+                'distance_to_target': 0,
+                'risk_reward': 1,
+            })
+            logger.info(f"Added baseline ML snapshot for {asset} with live pricing only")
+
         # Calculate overall accuracy
         overall_accuracy = round(total_accuracy / valid_predictions, 1) if valid_predictions > 0 else 0
         
@@ -560,7 +589,7 @@ def get_ml():
         ml_data = {
             "predictions_active": len(predictions),
             "overall_accuracy": overall_accuracy,
-            "assets_tracked": len(set(p['asset'] for p in predictions)),
+            "assets_tracked": len(set(p['asset'] for p in prediction_analysis)),
             "predictions_made": len(predictions),
             "coherence_score": 85 if overall_accuracy > 70 else 70 if overall_accuracy > 50 else 55,
             "live_predictions": prediction_analysis,
@@ -590,10 +619,18 @@ def get_ml():
                 "overall_bias": "Risk-On" if overall_accuracy > 65 else "Cautious"
             },
             "price_summary": {
-                asset: {
-                    "price": data.get('price', 0),
-                    "change_24h": data.get('change_pct', 0)
-                } for asset, data in crypto_prices.items() if asset != 'TOTAL_MARKET_CAP'
+                **{
+                    asset: {
+                        "price": data.get('price', 0),
+                        "change_24h": data.get('change_pct', 0)
+                    } for asset, data in crypto_prices.items() if asset != 'TOTAL_MARKET_CAP'
+                },
+                **{
+                    asset: {
+                        "price": data.get('price', 0),
+                        "change_24h": data.get('change_pct', 0)
+                    } for asset, data in key_prices.items() if asset in {'SPX', 'EURUSD', 'GOLD'}
+                }
             }
         }
         

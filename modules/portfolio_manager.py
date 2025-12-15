@@ -17,39 +17,18 @@ import logging
 from config import sv_paths
 from modules.portfolio.decision_layer import PortfolioDecisionLayer
 
-# Backward-compatible module-level toggle so older callers that referenced a
-# bare ``allow_manual_brokers`` variable instead of the instance attribute keep
-# working without raising NameError when the dashboard hits the portfolio API.
-ALLOW_MANUAL_BROKERS_DEFAULT = os.getenv("SV_PORTFOLIO_ALLOW_MANUAL_BROKERS", "1") == "1"
-allow_manual_brokers = ALLOW_MANUAL_BROKERS_DEFAULT
-
-__all__ = [
-    "SVPortfolioManager",
-    "get_portfolio_manager",
-    "allow_manual_brokers",
-    "ALLOW_MANUAL_BROKERS_DEFAULT",
-]
-
 logger = logging.getLogger(__name__)
 
 
 class SVPortfolioManager:
     """Manages $10K simulated portfolio tracking ML signals."""
 
-    def __init__(
-        self,
-        base_dir: str,
-        portfolio_file: Optional[str] = None,
-        history_dir: Optional[str] = None,
-        *,
-        allow_manual_brokers: bool | None = None,
-        force_reset: bool | None = None,
-    ):
+    def __init__(self, base_dir: str, portfolio_file: Optional[str] = None, history_dir: Optional[str] = None):
         self.base_dir = base_dir
         self.portfolio_file = portfolio_file or sv_paths.PORTFOLIO_STATE_FILE
         self.history_dir = history_dir or os.path.join(base_dir, 'reports', 'portfolio_history')
-        manual_default = allow_manual_brokers if allow_manual_brokers is not None else ALLOW_MANUAL_BROKERS_DEFAULT
-        self.allow_manual_brokers = manual_default
+        allow_manual_default = os.getenv("SV_PORTFOLIO_ALLOW_MANUAL_BROKERS", "1") == "1"
+        self.allow_manual_brokers = allow_manual_brokers if allow_manual_brokers is not None else allow_manual_default
         self.force_reset = bool(
             force_reset
             if force_reset is not None
@@ -65,7 +44,6 @@ class SVPortfolioManager:
             'ADA': 'crypto', 'XRP': 'crypto', 'DOT': 'crypto', 'LINK': 'crypto',
             'SPX': 'equity', '^GSPC': 'equity', 'SP500': 'equity', 'SPY': 'equity', 'QQQ': 'equity',
             'AAPL': 'equity', 'MSFT': 'equity',
-            'BND': 'bonds', 'AGG': 'bonds', 'TLT': 'bonds', 'IEF': 'bonds',
             'EURUSD': 'fx', 'EURUSD=X': 'fx',
             'GOLD': 'equity', 'XAUUSD=X': 'equity',
         }
@@ -160,8 +138,6 @@ class SVPortfolioManager:
                 with open(self.portfolio_file, 'r', encoding='utf-8') as f:
                     portfolio = json.load(f)
                     portfolio = self._ensure_broker_state(portfolio)
-                    self.portfolio = portfolio
-                    self._update_portfolio_metrics()
                     if portfolio.get('initial_capital') != self.initial_capital:
                         logger.info(
                             "Portfolio state uses legacy capital; resetting to $%s", self.initial_capital
@@ -289,9 +265,6 @@ class SVPortfolioManager:
                 brokers[name].setdefault('taxes_accrued', 0.0)
         portfolio['brokers'] = brokers
         portfolio['initial_capital'] = self.initial_capital
-        portfolio.setdefault('total_fees_paid', 0.0)
-        portfolio.setdefault('total_estimated_taxes', 0.0)
-        portfolio.setdefault('backtest_manual_trading', self.allow_manual_brokers)
         return portfolio
     
     def calculate_position_size(self, entry_price: float, stop_price: float,
@@ -773,11 +746,6 @@ class SVPortfolioManager:
 def get_portfolio_manager(base_dir: str = None) -> SVPortfolioManager:
     """Get portfolio manager instance"""
     global allow_manual_brokers
-
-    # Ensure defensive fallbacks exist even if a caller manipulated globals or
-    # imported the helper before the module-level defaults were initialized.
-    if "ALLOW_MANUAL_BROKERS_DEFAULT" not in globals():
-        globals()["ALLOW_MANUAL_BROKERS_DEFAULT"] = os.getenv("SV_PORTFOLIO_ALLOW_MANUAL_BROKERS", "1") == "1"
 
     if base_dir is None:
         base_dir = Path(__file__).resolve().parent.parent

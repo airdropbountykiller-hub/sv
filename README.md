@@ -7,8 +7,10 @@
 ![Messages](https://img.shields.io/badge/messages-TELEGRAM_INTEGRATED-blue.svg)
 
 ## 🆕 Latest status (Nov 24, 2025)
-- Weekly PDF/reporting polishing è stabile: se hai bisogno di rigenerare un weekly rapido usa `python "temp_tests/generate_weekly.py"` e controlla i summary in `reports/2_weekly/`.
-- ENGINE/BRAIN heartbeat v2 attivo: popola `reports/metrics/live_state.json` con regime, segnali e snapshot di rischio per dashboard/monitoring.
+- Orchestrator continuo attivo: `SVOrchestrator` cicla ogni 30s, interroga lo scheduler, lancia i trigger di contenuto (night/morning/weekly/monthly/...) e invia heartbeat periodici.
+- Scheduler potenziato: calendario di mercato, pianificazione per fascia oraria/periodo (giornaliera, settimanale, mensile, trimestrale, semestrale), deduplica per periodo e persistenza dei flag in file di stato.
+- Daily generator arricchito: integra emoji, news, calendario economico, segnali di momentum, gestione portafoglio e funzioni live crypto per produrre i contenuti di giornata.
+- PDF engine + dashboard: modulo ReportLab con grafici integrati e dashboard Flask che espone prezzi crypto, snapshot di mercato e accuratezza previsioni tramite API/template.
 - Focus prossimo step: riprendere il lavoro sul Monthly report (layout + KPI compatti) dal 25 Nov, mantenendo la regola "zero numeri inventati" su tutti i contenuti.
 
 ## 📎 **MAIN OBJECTIVE**

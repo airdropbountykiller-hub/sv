@@ -7,20 +7,9 @@ from typing import Dict, List, Any
 class PortfolioExecutor:
     """Generate recommended trades respecting broker policies and allocation drift."""
 
-    def __init__(
-        self,
-        broker_profiles: Dict[str, Dict[str, Any]],
-        asset_clusters: Dict[str, str],
-        *,
-        deviation_threshold: float = 0.10,
-        min_score: float = 0.6,
-        min_notional: float = 100.0,
-    ):
+    def __init__(self, broker_profiles: Dict[str, Dict[str, Any]], asset_clusters: Dict[str, str]):
         self.broker_profiles = broker_profiles
         self.asset_clusters = asset_clusters
-        self.deviation_threshold = deviation_threshold
-        self.min_score = min_score
-        self.min_notional = min_notional
 
     def _pick_broker(self, asset_class: str) -> str | None:
         """Choose a broker for an asset class honoring auto_trading flag."""
@@ -43,19 +32,17 @@ class PortfolioExecutor:
         signals: List[Dict[str, Any]],
         allocation_state,
         portfolio_state: Dict[str, Any],
-        rebalance_flags: Dict[str, Any] | None = None,
     ) -> List[Dict[str, Any]]:
         recommendations: List[Dict[str, Any]] = []
 
         broker_states = portfolio_state.get("brokers", {})
-        rebalance_flags = rebalance_flags or {}
 
         for asset_class, deviation in allocation_state.deviations.items():
             difference_pct = deviation.get("difference_pct", 0.0)
             difference_value = deviation.get("difference_value", 0.0)
 
-            # Require > configured drift from target
-            if abs(difference_pct) < self.deviation_threshold:
+            # Require >10% drift from target
+            if abs(difference_pct) < 0.10:
                 continue
 
             # When under target we look to buy; when over target we suggest trimming
@@ -76,7 +63,7 @@ class PortfolioExecutor:
             combined_score = (float(best_signal.get("ai_score", 0)) + float(best_signal.get("technical_score", 0))) / 2
 
             # Favorable condition threshold
-            if combined_score < self.min_score:
+            if combined_score < 0.6:
                 continue
 
             broker = self._pick_broker(asset_class)
@@ -92,14 +79,8 @@ class PortfolioExecutor:
             else:
                 notional = min(abs(difference_value), exposure)
 
-            if notional < self.min_notional:  # keep recommendations meaningful
+            if notional < 100:  # keep recommendations meaningful
                 continue
-
-            reason = "allocation_drift"
-            if rebalance_flags.get("monthly_due"):
-                reason = "rebalance_monthly"
-            elif rebalance_flags.get("extraordinary_due"):
-                reason = "rebalance_extraordinary"
 
             recommendations.append(
                 {
@@ -108,7 +89,7 @@ class PortfolioExecutor:
                     "broker": broker,
                     "action": action,
                     "notional": round(notional, 2),
-                    "reason": reason,
+                    "reason": "allocation_drift",
                     "scores": {
                         "ai": best_signal.get("ai_score"),
                         "technical": best_signal.get("technical_score"),

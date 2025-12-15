@@ -30,7 +30,6 @@ class SVPortfolioManager:
             'ADA': 'crypto', 'XRP': 'crypto', 'DOT': 'crypto', 'LINK': 'crypto',
             'SPX': 'equity', '^GSPC': 'equity', 'SP500': 'equity', 'SPY': 'equity', 'QQQ': 'equity',
             'AAPL': 'equity', 'MSFT': 'equity',
-            'BND': 'bonds', 'AGG': 'bonds', 'TLT': 'bonds', 'IEF': 'bonds',
             'EURUSD': 'fx', 'EURUSD=X': 'fx',
             'GOLD': 'equity', 'XAUUSD=X': 'equity',
         }

@@ -694,7 +694,7 @@ def ml_asset_results():
 
 @app.route('/api/portfolio_snapshot')
 def get_portfolio_snapshot_api():
-    """Get current portfolio snapshot with $25K tracking"""
+    """Get current portfolio snapshot with $10K tracking"""
     try:
         if not SV_MODULES_AVAILABLE:
             return jsonify({'error': 'Portfolio manager not available'}), 503
@@ -711,7 +711,7 @@ def get_portfolio_snapshot_api():
         snapshot = portfolio_manager.get_portfolio_snapshot()
         
         # Add additional dashboard metrics
-        snapshot['initial_capital'] = 25000
+        snapshot['initial_capital'] = portfolio_manager.initial_capital
         snapshot['timestamp'] = datetime.now().isoformat()
         
         logger.info(f"Portfolio snapshot: ${snapshot['current_balance']:.2f} ({snapshot['total_pnl_pct']:.2f}%)")

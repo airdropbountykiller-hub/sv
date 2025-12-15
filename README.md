@@ -191,7 +191,7 @@ The `modules/portfolio_manager.py` class already stores broker-specific limits a
   - Signals results by asset (hit rate per asset) via `/api/ml/asset_results` (added)
   - Main ML analysis endpoint `/api/ml` usa previsioni reali + prezzi live per calcolare `overall_accuracy`, momentum e risk metrics.
 - New portfolio & timeline endpoints (COMPLETED):
-  - `/api/portfolio_snapshot` e `/api/portfolio_positions` esposti dalla dashboard per il portafoglio simulato $25K gestito da `modules/portfolio_manager.py`.
+  - `/api/portfolio_snapshot` e `/api/portfolio_positions` esposti dalla dashboard per il portafoglio simulato $10K gestito da `modules/portfolio_manager.py`.
   - `/api/intraday_timeline` legge `reports/metrics/engine_YYYY-MM-DD.json` e costruisce una timeline Press→Morning→Noon→Evening→Summary con accuracy e stato (completed/pending).
 - Upcoming polish (to do):
   - Asset filter/drill‑down e timeline grafica avanzata (Press→Morning→Noon→Evening)

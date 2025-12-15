@@ -14,7 +14,6 @@ class PortfolioStateBuilder:
         allocation_state,
         risk_report,
         recommended_trades: List[Dict[str, Any]],
-        rebalance_flags: Dict[str, Any],
     ) -> Dict[str, Any]:
         return {
             "generated_at": datetime.utcnow().isoformat(),
@@ -32,7 +31,6 @@ class PortfolioStateBuilder:
                 "max_drawdown": risk_report.max_drawdown,
                 "asset_risks": risk_report.asset_risks,
             },
-            "rebalancing": rebalance_flags,
             "active_positions": portfolio_state.get("active_positions", []),
             "closed_positions": portfolio_state.get("closed_positions", []),
             "brokers": portfolio_state.get("brokers", {}),
@@ -45,7 +43,6 @@ class PortfolioStateBuilder:
         recommended_trades: List[Dict[str, Any]],
         allocation_state,
         risk_report,
-        rebalance_flags: Dict[str, Any],
     ) -> Dict[str, Any]:
         return {
             "generated_at": datetime.utcnow().isoformat(),
@@ -61,7 +58,6 @@ class PortfolioStateBuilder:
                 "volatility": risk_report.volatility,
                 "max_drawdown": risk_report.max_drawdown,
             },
-            "rebalancing": rebalance_flags,
             "recommended_trades": recommended_trades,
         }
 

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SV News</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;
+            color: #e6e6e6;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+            border-bottom: 2px solid #4fd1c7;
+            padding: 0.5rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-tab {
+            padding: 0.5rem 1rem;
+            background: rgba(79, 209, 199, 0.1);
+            border: 1px solid rgba(79, 209, 199, 0.3);
+            border-radius: 20px;
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .header-tab:hover {
+            background: rgba(79, 209, 199, 0.2);
+            color: #4fd1c7;
+            border-color: rgba(79, 209, 199, 0.5);
+        }
+
+        .header-tab.active {
+            background: linear-gradient(135deg, #4fd1c7 0%, #38b2ac 100%);
+            color: #1a1f2e;
+            border-color: #4fd1c7;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-container {
+            background: #0a0f14;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .category-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(79, 209, 199, 0.3);
+            background: rgba(79, 209, 199, 0.1);
+            color: #e6e6e6;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-1px);
+            border-color: #4fd1c7;
+            color: #4fd1c7;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #4fd1c7 0%, #38b2ac 100%);
+            color: #1a1f2e;
+            border-color: #4fd1c7;
+        }
+
+        .category-btn.critical-filter {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: rgba(244, 67, 54, 0.4);
+            color: #f56565;
+        }
+
+        .content-sections {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .section {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 1.1rem;
+            color: #e6e6e6;
+        }
+
+        .section-badge {
+            background: rgba(79, 209, 199, 0.15);
+            color: #4fd1c7;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(79, 209, 199, 0.3);
+        }
+
+        .section-content {
+            padding: 1.2rem;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(79, 209, 199, 0.05);
+            border: 1px solid rgba(79, 209, 199, 0.15);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4fd1c7;
+        }
+
+        .stat-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        .news-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .news-filter-info {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .news-card {
+            background: rgba(79, 209, 199, 0.05);
+            border: 1px solid rgba(79, 209, 199, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(79, 209, 199, 0.4);
+        }
+
+        .news-card.critical {
+            border-color: rgba(244, 67, 54, 0.4);
+            background: rgba(244, 67, 54, 0.05);
+        }
+
+        .news-card.critical:hover {
+            border-color: rgba(244, 67, 54, 0.8);
+        }
+
+        .news-card.critical .news-title {
+            color: #f56565;
+        }
+
+        .news-card.critical .news-category {
+            color: #f56565;
+        }
+
+        .news-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-category {
+            color: #4fd1c7;
+            font-weight: 600;
+        }
+
+        .news-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #e6e6e6;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 0.8rem;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .news-source {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: #a0aec0;
+        }
+
+        .footer {
+            margin-top: 1.5rem;
+            border-top: 1px solid #1f2937;
+            padding: 1rem 0;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(79, 209, 199, 0.08);
+            border: 1px solid rgba(79, 209, 199, 0.2);
+            border-radius: 10px;
+            padding: 0.4rem 0.8rem;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <nav class="header-tabs">
+                <a href="/news" class="header-tab active">📰 News</a>
+                <a href="/portfolio" class="header-tab">💰 Portfolio</a>
+                <a href="/calendario" class="header-tab">📆 Calendar</a>
+                <a href="/ml" class="header-tab">🤖 ML Analysis</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-container">
+            <div class="category-filters" id="news-category-filters">
+                <button class="category-btn active" onclick="filterByCategory('all', this)">
+                    All
+                </button>
+                <button class="category-btn critical-filter" onclick="filterByCategory('critiche', this)">
+                    Critical
+                </button>
+            </div>
+
+            <div class="content-sections">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>📰 Latest Critical News</h2>
+                        <div class="news-controls">
+                            <span class="section-badge" id="news-count">--</span>
+                            <span class="news-filter-info" id="filter-info">All categories</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="stats-summary" id="news-stats">
+                            <div class="loading">Loading news stats...</div>
+                        </div>
+                        <div class="news-grid" id="news-content">
+                            <div class="loading">Loading latest news...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-content">
+            <div class="status-bar">
+                <div class="status-item">
+                    <span>🕒</span>
+                    <span id="current-time">--:--:--</span>
+                </div>
+                <div class="status-item">
+                    <span>📈</span>
+                    <span id="market-status">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allNews = [];
+        let currentNewsFilter = 'all';
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US');
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                document.getElementById('market-status').textContent =
+                    data.scheduler?.market_intelligence?.market_status || 'UNKNOWN';
+            } catch (error) {
+                console.error('Status fetch error:', error);
+            }
+        }
+
+        function filterByCategory(category, button) {
+            currentNewsFilter = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            if (button) {
+                button.classList.add('active');
+            }
+
+            let filterText;
+            if (category === 'all') {
+                filterText = 'All categories';
+            } else if (category === 'critiche') {
+                filterText = 'Critical news only';
+            } else {
+                filterText = category;
+            }
+            document.getElementById('filter-info').textContent = filterText;
+            displayFilteredNews();
+        }
+
+        function displayFilteredNews() {
+            let filteredNews;
+
+            if (currentNewsFilter === 'all') {
+                filteredNews = allNews;
+            } else if (currentNewsFilter === 'critiche') {
+                filteredNews = allNews.filter(news => news.critica === true);
+            } else {
+                filteredNews = allNews.filter(news => news.categoria === currentNewsFilter);
+            }
+
+            document.getElementById('news-count').textContent = `${filteredNews.length} news`;
+
+            const newsHtml = filteredNews
+                .map(news => {
+                    const criticalClass = news.critica ? ' critical' : '';
+                    const showCriticalIcon = currentNewsFilter === 'critiche' || news.critica;
+                    const criticalIcon = news.critica && showCriticalIcon ? '🚨 ' : '';
+
+                    return `
+                        <div class="news-card${criticalClass}" onclick="window.open('${news.link}', '_blank')">
+                            <div class="news-card-header">
+                                <div class="news-category">${criticalIcon}${news.categoria}</div>
+                            </div>
+                            <div class="news-title">${news.titolo}</div>
+                            <div class="news-meta">
+                                <div class="news-source">
+                                    <span>📰</span>
+                                    <span>${news.fonte}</span>
+                                </div>
+                                <div class="news-source">
+                                    <span>🕒</span>
+                                    <span>${news.data || 'Now'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('news-content').innerHTML = newsHtml ||
+                '<div class="loading">No news found for this category</div>';
+        }
+
+        function generateCategoryFilters(categories) {
+            const filtersContainer = document.getElementById('news-category-filters');
+            let filtersHtml = `
+                <button class="category-btn active" onclick="filterByCategory('all', this)">
+                    All
+                </button>
+                <button class="category-btn critical-filter" onclick="filterByCategory('critiche', this)">
+                    Critical
+                </button>
+            `;
+
+            Object.keys(categories).forEach(category => {
+                if (category !== 'Critiche') {
+                    filtersHtml += `
+                        <button class="category-btn" onclick="filterByCategory('${category}', this)">
+                            ${category}
+                        </button>
+                    `;
+                }
+            });
+
+            filtersContainer.innerHTML = filtersHtml;
+        }
+
+        async function fetchNews() {
+            try {
+                const response = await fetch('/api/news');
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('news-content').innerHTML =
+                        `<div class="error">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                allNews = data.latest_news || [];
+                const criticalCount = allNews.filter(news => news.critica === true).length;
+                let statsData = Object.entries(data.by_category || {});
+                statsData.unshift(['Critiche', criticalCount]);
+
+                const categories = data.by_category || {};
+                categories['Critiche'] = criticalCount;
+                generateCategoryFilters(categories);
+                displayFilteredNews();
+
+                const statsHtml = statsData.map(([category, count]) => `
+                    <div class="stat-card">
+                        <div class="stat-number">${count}</div>
+                        <div class="stat-label">${category}</div>
+                    </div>
+                `).join('');
+
+                document.getElementById('news-stats').innerHTML = statsHtml ||
+                    '<div class="loading">No news available</div>';
+            } catch (error) {
+                console.error('News fetch error:', error);
+                document.getElementById('news-content').innerHTML =
+                    `<div class="error">Failed to load news: ${error.message}</div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTime();
+            setInterval(updateTime, 1000);
+            fetchStatus();
+            fetchNews();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SV Portfolio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;
+            color: #e6e6e6;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+            border-bottom: 2px solid #4fd1c7;
+            padding: 0.5rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-tab {
+            padding: 0.5rem 1rem;
+            background: rgba(79, 209, 199, 0.1);
+            border: 1px solid rgba(79, 209, 199, 0.3);
+            border-radius: 20px;
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .header-tab:hover {
+            background: rgba(79, 209, 199, 0.2);
+            color: #4fd1c7;
+            border-color: rgba(79, 209, 199, 0.5);
+        }
+
+        .header-tab.active {
+            background: linear-gradient(135deg, #4fd1c7 0%, #38b2ac 100%);
+            color: #1a1f2e;
+            border-color: #4fd1c7;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-container {
+            background: #0a0f14;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .content-sections {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .portfolio-sections {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-areas:
+                "performance performance"
+                "intraday positions";
+        }
+
+        .portfolio-panel {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #4fd1c7;
+            grid-area: performance;
+        }
+
+        .portfolio-header {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .portfolio-header h3 {
+            margin: 0;
+            color: #4fd1c7;
+            font-size: 1.1rem;
+        }
+
+        .portfolio-content { padding: 1rem 1.2rem; }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: rgba(79, 209, 199, 0.05);
+            border: 1px solid rgba(79, 209, 199, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4fd1c7;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .metric-sub {
+            font-size: 0.8rem;
+            color: #68d391;
+            margin-top: 0.2rem;
+        }
+
+        .portfolio-intraday { grid-area: intraday; }
+        .portfolio-positions { grid-area: positions; }
+
+        .section {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 { font-size: 1.1rem; color: #e6e6e6; }
+
+        .section-badge {
+            background: rgba(79, 209, 199, 0.15);
+            color: #4fd1c7;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(79, 209, 199, 0.3);
+        }
+
+        .section-content { padding: 1.2rem; }
+
+        .intraday-timeline { display: flex; flex-direction: column; gap: 0.8rem; }
+
+        .timeline-item {
+            background: rgba(79, 209, 199, 0.05);
+            border: 1px solid rgba(79, 209, 199, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: grid;
+            grid-template-columns: 90px 1fr 100px 100px;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .timeline-item.completed { border-left: 3px solid #48bb78; }
+        .timeline-item.pending { border-left: 3px solid #f56565; }
+        .timeline-item.scheduled { border-left: 3px solid #4fd1c7; }
+
+        .timeline-time { color: #a0aec0; font-weight: 600; }
+        .timeline-event { color: #e6e6e6; }
+        .timeline-accuracy { color: #68d391; font-weight: 600; }
+        .timeline-sentiment { color: #63b3ed; font-weight: 600; }
+
+        .positions-list { margin-top: 1rem; }
+
+        .position-item {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1fr 0.9fr 0.8fr 1.1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.8rem;
+            background: rgba(79, 209, 199, 0.03);
+            border: 1px solid rgba(79, 209, 199, 0.1);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .position-asset { font-weight: 600; color: #e6e6e6; }
+        .position-entry, .position-current, .position-time { color: #a0aec0; font-size: 0.9rem; }
+        .position-pnl { font-weight: 600; }
+        .position-pnl.positive { color: #48bb78; }
+        .position-pnl.negative { color: #f56565; }
+        .position-pnl.neutral { color: #a0aec0; }
+
+        .progress-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(79, 209, 199, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress { height: 100%; background: linear-gradient(90deg, #4fd1c7, #38b2ac); }
+
+        .footer {
+            margin-top: 1.5rem;
+            border-top: 1px solid #1f2937;
+            padding: 1rem 0;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .status-bar { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(79, 209, 199, 0.08);
+            border: 1px solid rgba(79, 209, 199, 0.2);
+            border-radius: 10px;
+            padding: 0.4rem 0.8rem;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1100px) {
+            .position-item { grid-template-columns: 1.2fr 1fr 1fr 1fr; }
+        }
+
+        @media (max-width: 700px) {
+            .portfolio-sections {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "performance"
+                    "intraday"
+                    "positions";
+            }
+
+            .position-item { grid-template-columns: 1fr; }
+            .timeline-item { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <nav class="header-tabs">
+                <a href="/news" class="header-tab">📰 News</a>
+                <a href="/portfolio" class="header-tab active">💰 Portfolio</a>
+                <a href="/calendario" class="header-tab">📆 Calendar</a>
+                <a href="/ml" class="header-tab">🤖 ML Analysis</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-container">
+            <div class="content-sections portfolio-sections">
+                <div class="portfolio-panel">
+                    <div class="portfolio-header">
+                        <h3>💰 Portfolio Performance - $10K Initial Capital</h3>
+                        <span class="section-badge" id="portfolio-status">--</span>
+                    </div>
+                    <div class="portfolio-content">
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <span class="metric-value" id="current-balance">--</span>
+                                <span class="metric-label">Current Balance</span>
+                                <span class="metric-sub" id="total-pnl">--</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-value" id="active-positions">--</span>
+                                <span class="metric-label">Active Positions</span>
+                                <span class="metric-sub" id="available-cash">--</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-value" id="win-rate">--</span>
+                                <span class="metric-label">Win Rate</span>
+                                <span class="metric-sub" id="total-trades">--</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-value" id="profit-factor">--</span>
+                                <span class="metric-label">Profit Factor</span>
+                                <span class="metric-sub" id="sharpe-ratio">--</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-value" id="total-fees-paid">--</span>
+                                <span class="metric-label">Total Fees Paid</span>
+                                <span class="metric-sub">Cumulative costs</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-value" id="estimated-taxes">--</span>
+                                <span class="metric-label">Estimated Taxes</span>
+                                <span class="metric-sub">Accrued</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section portfolio-intraday">
+                    <div class="section-header">
+                        <h2>⏰ Intraday Timeline</h2>
+                        <span class="section-badge" id="timeline-status">--</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="intraday-timeline" id="timeline-content">
+                            <div class="loading">Loading intraday timeline...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section portfolio-positions">
+                    <div class="section-header">
+                        <h2>📈 Active Positions</h2>
+                        <span class="section-badge" id="positions-count">--</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="positions-list" id="positions-content">
+                            <div class="loading">Loading active positions...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-content">
+            <div class="status-bar">
+                <div class="status-item">
+                    <span>🕒</span>
+                    <span id="current-time">--:--:--</span>
+                </div>
+                <div class="status-item">
+                    <span>📈</span>
+                    <span id="market-status">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US');
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                document.getElementById('market-status').textContent =
+                    data.scheduler?.market_intelligence?.market_status || 'UNKNOWN';
+            } catch (error) {
+                console.error('Status fetch error:', error);
+            }
+        }
+
+        async function fetchPortfolio() {
+            try {
+                const portfolioResponse = await fetch('/api/portfolio_snapshot');
+                const portfolioData = await portfolioResponse.json();
+
+                if (portfolioData.error) {
+                    document.getElementById('positions-content').innerHTML =
+                        `<div class="error">Portfolio Error: ${portfolioData.error}</div>`;
+                    return;
+                }
+
+                document.getElementById('current-balance').textContent =
+                    `$${portfolioData.current_balance?.toLocaleString() || '--'}`;
+                document.getElementById('total-pnl').textContent =
+                    `${portfolioData.total_pnl_pct >= 0 ? '+' : ''}${portfolioData.total_pnl_pct?.toFixed(2) || '--'}%`;
+                document.getElementById('active-positions').textContent =
+                    `${portfolioData.active_positions || 0}`;
+                document.getElementById('available-cash').textContent =
+                    `$${portfolioData.available_cash?.toLocaleString() || '--'}`;
+                document.getElementById('win-rate').textContent =
+                    `${portfolioData.performance_metrics?.win_rate?.toFixed(1) || '--'}%`;
+                document.getElementById('total-trades').textContent =
+                    `${portfolioData.performance_metrics?.total_trades || 0} trades`;
+                document.getElementById('profit-factor').textContent =
+                    `${portfolioData.performance_metrics?.profit_factor?.toFixed(2) || '--'}`;
+                document.getElementById('sharpe-ratio').textContent =
+                    `${portfolioData.performance_metrics?.sharpe_ratio || 'N/A'}`;
+                document.getElementById('total-fees-paid').textContent =
+                    `$${portfolioData.total_fees_paid?.toLocaleString() || '--'}`;
+                document.getElementById('estimated-taxes').textContent =
+                    `$${portfolioData.total_estimated_taxes?.toLocaleString() || '--'}`;
+
+                document.getElementById('portfolio-status').textContent =
+                    portfolioData.total_pnl >= 0 ? 'Profitable' : 'Loss';
+                document.getElementById('positions-count').textContent =
+                    `${portfolioData.active_positions || 0} positions`;
+
+                const positionsResponse = await fetch('/api/portfolio_positions');
+                const positionsData = await positionsResponse.json();
+
+                if (positionsData.positions && positionsData.positions.length > 0) {
+                    const positionsHtml = positionsData.positions.map(pos => {
+                        const pnlClass = pos.current_pnl >= 0 ? 'positive' : pos.current_pnl < 0 ? 'negative' : 'neutral';
+                        const progressPct = pos.position_size ? Math.abs(pos.current_pnl) / pos.position_size * 100 : 0;
+                        const entryDate = pos.entry_time ? new Date(pos.entry_time) : null;
+                        const entryTime = entryDate && !isNaN(entryDate) ? entryDate.toLocaleString() : '--';
+                        const broker = pos.broker || '--';
+                        const positionSize = pos.position_size ? pos.position_size.toLocaleString() : '--';
+                        const leverage = pos.leverage ? `${pos.leverage}x` : '--';
+
+                        return `
+                            <div class="position-item">
+                                <div class="position-asset">${pos.asset} ${pos.direction}</div>
+                                <div class="position-entry">Entry: $${pos.entry_price?.toLocaleString()}</div>
+                                <div class="position-current">Current: $${pos.current_price?.toLocaleString()}</div>
+                                <div class="position-size">Size: ${positionSize}</div>
+                                <div class="position-broker">Broker: ${broker}</div>
+                                <div class="position-leverage">Leverage: ${leverage}</div>
+                                <div class="position-time">Opened: ${entryTime}</div>
+                                <div class="position-pnl ${pnlClass}">
+                                    $${pos.current_pnl?.toFixed(2)} (${pos.pnl_percentage?.toFixed(2)}%)
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: ${Math.min(100, progressPct)}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    document.getElementById('positions-content').innerHTML = positionsHtml;
+                } else {
+                    document.getElementById('positions-content').innerHTML =
+                        '<div class="loading">No active positions</div>';
+                }
+
+                const timelineResponse = await fetch('/api/intraday_timeline');
+                const timelineData = await timelineResponse.json();
+
+                if (timelineData.timeline && timelineData.timeline.length > 0) {
+                    const timelineHtml = timelineData.timeline.map(event => {
+                        const statusClass = event.status === 'completed' ? 'completed' :
+                                          event.status === 'pending' ? 'pending' : 'scheduled';
+
+                        return `
+                            <div class="timeline-item ${statusClass}">
+                                <div class="timeline-time">${event.time}</div>
+                                <div class="timeline-event">${event.event}</div>
+                                <div class="timeline-accuracy">${event.accuracy}</div>
+                                <div class="timeline-sentiment">${event.sentiment}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    document.getElementById('timeline-content').innerHTML = timelineHtml;
+                    document.getElementById('timeline-status').textContent =
+                        `${timelineData.timeline.length} stages`;
+                } else {
+                    document.getElementById('timeline-content').innerHTML =
+                        '<div class="loading">No timeline data available</div>';
+                    document.getElementById('timeline-status').textContent = 'No data';
+                }
+
+            } catch (error) {
+                console.error('Portfolio fetch error:', error);
+                document.getElementById('positions-content').innerHTML =
+                    `<div class="error">Failed to load portfolio: ${error.message}</div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTime();
+            setInterval(updateTime, 1000);
+            fetchStatus();
+            fetchPortfolio();
+        });
+    </script>
+</body>
+</html>

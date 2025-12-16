@@ -248,8 +248,8 @@ def get_ml_trading_signals():
 
 
 @app.route('/')
-def dashboard():
-    """Main dashboard page"""
+def dashboard_page():
+    """Landing page that frames navigation across sections"""
     try:
         template_path = os.path.join(TEMPLATES_DIR, 'dashboard.html')
         if not os.path.exists(template_path):
@@ -257,9 +257,39 @@ def dashboard():
             return f"<h1>SV Dashboard</h1><p>Template not found: {template_path}</p>", 404
         return render_template('dashboard.html')
     except Exception as e:
-        logger.error(f"Dashboard error: {e}")
+        logger.error(f"Dashboard page error: {e}")
         traceback.print_exc()
-        return f"<h1>Dashboard Error</h1><p>{str(e)}</p>", 500
+        return f"<h1>Dashboard Page Error</h1><p>{str(e)}</p>", 500
+
+
+@app.route('/news')
+def news_page():
+    """Standalone news page"""
+    try:
+        template_path = os.path.join(TEMPLATES_DIR, 'news.html')
+        if not os.path.exists(template_path):
+            logger.error(f"Template not found: {template_path}")
+            return f"<h1>SV News</h1><p>Template not found: {template_path}</p>", 404
+        return render_template('news.html')
+    except Exception as e:
+        logger.error(f"News page error: {e}")
+        traceback.print_exc()
+        return f"<h1>News Page Error</h1><p>{str(e)}</p>", 500
+
+
+@app.route('/portfolio')
+def portfolio_page():
+    """Standalone portfolio page"""
+    try:
+        template_path = os.path.join(TEMPLATES_DIR, 'portfolio.html')
+        if not os.path.exists(template_path):
+            logger.error(f"Template not found: {template_path}")
+            return f"<h1>SV Portfolio</h1><p>Template not found: {template_path}</p>", 404
+        return render_template('portfolio.html')
+    except Exception as e:
+        logger.error(f"Portfolio page error: {e}")
+        traceback.print_exc()
+        return f"<h1>Portfolio Page Error</h1><p>{str(e)}</p>", 500
 
 @app.route('/ml')
 def ml_page():
@@ -949,14 +979,21 @@ def main():
     # Setup directories
     setup_directories()
     
-    # Check template
-    template_path = os.path.join(TEMPLATES_DIR, 'dashboard.html')
-    if not os.path.exists(template_path):
-        print(f"⚠️  Template not found: {template_path}")
-        print("📊 Dashboard available via API only")
-    
+    # Check templates
+    dashboard_template = os.path.join(TEMPLATES_DIR, 'dashboard.html')
+    news_template = os.path.join(TEMPLATES_DIR, 'news.html')
+    portfolio_template = os.path.join(TEMPLATES_DIR, 'portfolio.html')
+    if not os.path.exists(dashboard_template):
+        print(f"⚠️  Template not found: {dashboard_template}")
+    if not os.path.exists(news_template):
+        print(f"⚠️  Template not found: {news_template}")
+    if not os.path.exists(portfolio_template):
+        print(f"⚠️  Template not found: {portfolio_template}")
+
     print("\n📊 Dashboard starting at:")
-    print("   - http://localhost:5000 (web interface)")
+    print("   - http://localhost:5000 (dashboard)")
+    print("   - http://localhost:5000/news (news)")
+    print("   - http://localhost:5000/portfolio (portfolio)")
     print("   - http://localhost:5000/api/status (system status)")
     print("   - http://localhost:5000/api/news (news feed)")
     print("   - http://localhost:5000/api/calendar (calendar events)")

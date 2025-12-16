@@ -161,6 +161,7 @@ class SVPortfolioManager:
                 with open(self.portfolio_file, 'r', encoding='utf-8') as f:
                     portfolio = json.load(f)
                     portfolio = self._ensure_broker_state(portfolio)
+                    changed = self._normalize_closed_positions(portfolio)
                     if portfolio.get('initial_capital') != self.initial_capital:
                         logger.info(
                             "Portfolio state uses legacy capital; resetting to $%s", self.initial_capital
@@ -169,6 +170,11 @@ class SVPortfolioManager:
                         self._save_portfolio(portfolio)
                     else:
                         logger.info(f"Loaded portfolio: ${portfolio['current_balance']:.2f}")
+                        if changed:
+                            # Persist cleaned close prices/P&L and refresh aggregates
+                            self.portfolio = portfolio
+                            self._update_portfolio_metrics()
+                            self._save_portfolio(self.portfolio)
                     return portfolio
             except Exception as e:
                 logger.error(f"Error loading portfolio: {e}")
@@ -313,6 +319,69 @@ class SVPortfolioManager:
         portfolio['brokers'] = brokers
         portfolio['initial_capital'] = self.initial_capital
         return portfolio
+
+    def _normalize_closed_positions(self, portfolio: Dict[str, Any]) -> bool:
+        """Clamp closed trades to their configured exits and recompute P&L.
+
+        Older history could store a live market print as the close price, which
+        can inflate losses well beyond the configured stop (e.g., a gold trade
+        showing -97%). This routine normalizes stored closures to their target
+        or stop and refreshes downstream P&L figures so legacy rows stay
+        realistic.
+        """
+
+        changed = False
+        closed_positions = portfolio.get('closed_positions', []) or []
+
+        for position in closed_positions:
+            close_reason = str(position.get('close_reason', '')).upper()
+            close_price = position.get('close_price')
+
+            if close_reason in {'STOP_HIT', 'STOP_LOSS'} and position.get('stop_price'):
+                close_price = position['stop_price']
+            elif close_reason in {'TARGET_HIT', 'TAKE_PROFIT'} and position.get('target_price'):
+                close_price = position['target_price']
+
+            if not close_price or not position.get('entry_price') or not position.get('units'):
+                if position.get('close_reason') != close_reason:
+                    position['close_reason'] = close_reason
+                    changed = True
+                continue
+
+            entry_price = position['entry_price']
+            units = position['units']
+            direction = str(position.get('direction', 'LONG')).upper()
+            broker_name = position.get('broker', 'IG')
+            broker_profile = self.broker_profiles.get(broker_name, {})
+
+            fee_rate = broker_profile.get('fee_rate', self.default_fee_rate)
+            tax_rate = broker_profile.get('tax_rate', self.default_tax_rate)
+
+            if direction == 'LONG':
+                pnl = (close_price - entry_price) * units
+            else:
+                pnl = (entry_price - close_price) * units
+
+            entry_fee = position.get('entry_fee', 0.0)
+            exit_fee = close_price * units * fee_rate
+            total_fees = entry_fee + exit_fee
+
+            taxable_profit = max(pnl - total_fees, 0)
+            estimated_taxes = taxable_profit * tax_rate
+            net_pnl = pnl - total_fees - estimated_taxes
+
+            position.update({
+                'close_price': close_price,
+                'close_reason': close_reason,
+                'fees_paid': round(total_fees, 2),
+                'estimated_taxes': round(estimated_taxes, 2),
+                'gross_pnl': round(pnl, 2),
+                'final_pnl': round(net_pnl, 2),
+                'final_pnl_pct': round((net_pnl / position.get('position_size', 1)) * 100, 2),
+            })
+            changed = True
+
+        return changed
     
     def calculate_position_size(self, entry_price: float, stop_price: float,
                               confidence: int, broker: str) -> float:
@@ -539,6 +608,13 @@ class SVPortfolioManager:
         units = position['units']
         direction = position['direction']
 
+        # Normalize close price using defined exit levels when available
+        normalized_reason = reason.upper()
+        if normalized_reason in {'STOP_HIT', 'STOP_LOSS'}:
+            close_price = position.get('stop_price', close_price)
+        elif normalized_reason in {'TARGET_HIT', 'TAKE_PROFIT'}:
+            close_price = position.get('target_price', close_price)
+
         if direction.upper() == 'LONG':
             pnl = (close_price - entry_price) * units
         else:  # SHORT
@@ -564,7 +640,7 @@ class SVPortfolioManager:
             'fees_paid': round(total_fees, 2),
             'estimated_taxes': round(estimated_taxes, 2),
             'final_pnl_pct': round((net_pnl / position['position_size']) * 100, 2),
-            'close_reason': reason,
+            'close_reason': normalized_reason,
             'status': 'CLOSED'
         })
         

@@ -22,6 +22,31 @@ DATABASE_URL=sqlite:///sv_data.db
 # Token per backup automatico su GitHub
 GITHUB_TOKEN=YOUR_GITHUB_TOKEN_HERE
 
+# === BYBIT (TESTNET) ===
+# Bybit v5 (derivatives) - usa TESTNET finché non sei sicuro.
+BYBIT_API_KEY=YOUR_BYBIT_API_KEY_HERE
+BYBIT_API_SECRET=YOUR_BYBIT_API_SECRET_HERE
+BYBIT_TESTNET=true
+
+# Safety gate: non piazza ordini finché non metti true
+BYBIT_ENABLE_TRADING=false
+
+# Per sicurezza: non abilitare mai su LIVE se non vuoi rischiare.
+BYBIT_ALLOW_LIVE=false
+
+# Optional tuning
+BYBIT_RECV_WINDOW_MS=5000
+BYBIT_TIMEOUT_SECONDS=10
+BYBIT_DEFAULT_LEVERAGE=3
+
+# === IG (DEMO) ===
+# IG non ha "testnet": usa IG_ENV=demo per fare trading su ambiente DEMO.
+# Safety gate: non piazza ordini finché non metti true
+IG_ENABLE_TRADING=false
+
+# Per sicurezza: non abilitare mai su LIVE se non vuoi rischiare.
+IG_ALLOW_LIVE=false
+
 # === ALTRE CONFIGURAZIONI ===
 # Timezone per il sistema (default: Europe/Rome)
 TIMEZONE=Europe/Rome

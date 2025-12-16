@@ -112,6 +112,44 @@
         .portfolio-content {
             padding: 1rem 1.2rem;
         }
+
+        .trader-status-line {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            background: rgba(79, 209, 199, 0.05);
+            border: 1px solid rgba(79, 209, 199, 0.15);
+            color: #a0aec0;
+            font-size: 0.85rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .trader-status-line strong {
+            color: #4fd1c7;
+            font-weight: 700;
+        }
+
+        .trader-status-pill {
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(160, 174, 192, 0.25);
+            color: #a0aec0;
+            font-size: 0.8rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .trader-status-pill.ok {
+            border-color: rgba(72, 187, 120, 0.35);
+            color: #68d391;
+        }
+
+        .trader-status-pill.warn {
+            border-color: rgba(255, 165, 2, 0.35);
+            color: #ffa502;
+        }
         
         .metrics-grid {
             display: grid;
@@ -2099,6 +2137,14 @@
                             <span class="section-badge" id="portfolio-status">--</span>
                         </div>
                         <div class="portfolio-content">
+                            <div class="trader-status-line" id="trader-status-line">
+                                <strong>TRADER</strong>
+                                <span class="trader-status-pill warn" id="trader-status-ok">loading…</span>
+                                <span class="trader-status-pill" id="trader-last-run">last_run: --</span>
+                                <span class="trader-status-pill" id="trader-opened">opened: --</span>
+                                <span class="trader-status-pill" id="trader-skipped">skipped: --</span>
+                                <span class="trader-status-pill" id="trader-simulate">simulate_only: --</span>
+                            </div>
                             <div class="metrics-grid">
                                 <div class="metric-card">
                                     <span class="metric-value" id="current-balance">--</span>
@@ -2909,8 +2955,53 @@
         }
         
         // Fetch and display portfolio data
+        async function fetchTraderStatus() {
+            const okEl = document.getElementById('trader-status-ok');
+            const lastRunEl = document.getElementById('trader-last-run');
+            const openedEl = document.getElementById('trader-opened');
+            const skippedEl = document.getElementById('trader-skipped');
+            const simEl = document.getElementById('trader-simulate');
+
+            if (!okEl || !lastRunEl || !openedEl || !skippedEl || !simEl) return;
+
+            try {
+                const resp = await fetch('/api/trader_status');
+                const data = await resp.json();
+
+                const daily = (data?.data?.daily_trader) || {};
+                const lastRunAt = daily?.last_run_at || '--';
+                const opened = (daily?.opened ?? '--');
+                const skipped = (daily?.skipped ?? '--');
+                const simulateOnly = (daily?.simulate_only ?? '--');
+
+                if (data?.ok) {
+                    okEl.textContent = 'ok';
+                    okEl.className = 'trader-status-pill ok';
+                } else {
+                    okEl.textContent = data?.error || 'missing';
+                    okEl.className = 'trader-status-pill warn';
+                }
+
+                lastRunEl.textContent = `last_run: ${lastRunAt}`;
+                openedEl.textContent = `opened: ${opened}`;
+                skippedEl.textContent = `skipped: ${skipped}`;
+                simEl.textContent = `simulate_only: ${simulateOnly}`;
+
+            } catch (e) {
+                okEl.textContent = 'error';
+                okEl.className = 'trader-status-pill warn';
+                lastRunEl.textContent = 'last_run: --';
+                openedEl.textContent = 'opened: --';
+                skippedEl.textContent = 'skipped: --';
+                simEl.textContent = 'simulate_only: --';
+            }
+        }
+
         async function fetchPortfolio() {
             try {
+                // Fetch trader status (non-blocking)
+                fetchTraderStatus();
+
                 // Fetch portfolio snapshot
                 const portfolioResponse = await fetch('/api/portfolio_snapshot');
                 const portfolioData = await portfolioResponse.json();

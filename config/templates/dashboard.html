@@ -153,7 +153,7 @@
         
         .position-item {
             display: grid;
-            grid-template-columns: 1.2fr 1fr 1fr 1fr 0.9fr 0.8fr 1.1fr auto;
+            grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr auto;
             gap: 1rem;
             align-items: center;
             padding: 0.8rem;
@@ -335,24 +335,7 @@
         }
 
         .portfolio-sections {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-template-areas:
-                "performance performance"
-                "intraday positions";
-            align-items: start;
-        }
-
-        .portfolio-panel {
-            grid-area: performance;
-            grid-column: 1 / -1;
-        }
-
-        .portfolio-intraday {
-            grid-area: intraday;
-        }
-
-        .portfolio-positions {
-            grid-area: positions;
+            grid-template-columns: 1fr;
         }
         
         .content-sections .section:only-child {
@@ -2162,7 +2145,7 @@
                         </div>
                     </div>
 
-                    <div class="section portfolio-intraday">
+                    <div class="section">
                         <div class="section-header">
                             <h2>⏰ Intraday Timeline</h2>
                             <span class="section-badge" id="timeline-status">--</span>
@@ -2174,7 +2157,7 @@
                         </div>
                     </div>
 
-                    <div class="section portfolio-positions">
+                    <div class="section">
                         <div class="section-header">
                             <h2>📈 Active Positions</h2>
                             <span class="section-badge" id="positions-count">--</span>
@@ -2963,21 +2946,15 @@
                 if (positionsData.positions && positionsData.positions.length > 0) {
                     const positionsHtml = positionsData.positions.map(pos => {
                         const pnlClass = pos.current_pnl >= 0 ? 'positive' : pos.current_pnl < 0 ? 'negative' : 'neutral';
-                        const progressPct = pos.position_size ? Math.abs(pos.current_pnl) / pos.position_size * 100 : 0;
+                        const progressPct = Math.abs(pos.current_pnl) / pos.position_size * 100;
                         const entryDate = pos.entry_time ? new Date(pos.entry_time) : null;
                         const entryTime = entryDate && !isNaN(entryDate) ? entryDate.toLocaleString() : '--';
-                        const broker = pos.broker || '--';
-                        const positionSize = pos.position_size ? pos.position_size.toLocaleString() : '--';
-                        const leverage = pos.leverage ? `${pos.leverage}x` : '--';
 
                         return `
                             <div class="position-item">
                                 <div class="position-asset">${pos.asset} ${pos.direction}</div>
                                 <div class="position-entry">Entry: $${pos.entry_price?.toLocaleString()}</div>
                                 <div class="position-current">Current: $${pos.current_price?.toLocaleString()}</div>
-                                <div class="position-size">Size: ${positionSize}</div>
-                                <div class="position-broker">Broker: ${broker}</div>
-                                <div class="position-leverage">Leverage: ${leverage}</div>
                                 <div class="position-time">Opened: ${entryTime}</div>
                                 <div class="position-pnl ${pnlClass}">
                                     $${pos.current_pnl?.toFixed(2)} (${pos.pnl_percentage?.toFixed(2)}%)

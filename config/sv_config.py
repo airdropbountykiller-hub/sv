@@ -41,7 +41,11 @@ RSS_FEEDS_CONFIG = {
         "https://www.wsj.com/xml/rss/3_7031.xml",  # WSJ Markets
         "https://www.bloomberg.com/feed/podcast/odd-lots",       # Bloomberg macro/markets podcast feed
         "https://www.bbc.co.uk/news/business/rss.xml",
-        "https://www.imf.org/external/pubs/ft/survey/eng/rss/rss.aspx"
+        "https://www.imf.org/external/pubs/ft/survey/eng/rss/rss.aspx",
+        # Institutional research/insights
+        "https://www.blackrock.com/us/individual/insights/rss",
+        "https://www.pimco.com/en-us/feeds/insights",
+        "https://www.oecd.org/newsroom/newsroom_rss_feed.xml"
     ],
     "Criptovalute": [
         "https://www.coindesk.com/arc/outboundfeeds/rss/",
@@ -67,7 +71,12 @@ RSS_FEEDS_CONFIG = {
         "https://www.theblock.co/rss",             # The Block
         "https://messari.io/rss",                  # Messari research updates
         "https://banklesshq.com/feed",             # Bankless
-        "https://newsletter.glassnode.com/feed"    # Glassnode on-chain insights
+        "https://newsletter.glassnode.com/feed",   # Glassnode on-chain insights
+        # Extra crypto/market structure monitoring
+        "https://crypto.news/feed/",               # Crypto.News
+        "https://bitcoinmagazine.com/.rss",        # Bitcoin Magazine
+        "https://chainalysis.com/blog/feed/",      # Chainalysis analytics/blog
+        "https://newsletter.defillama.com/feed"    # DeFiLlama newsletter
     ],
     "Geopolitica": [
         "https://feeds.reuters.com/Reuters/worldNews",
@@ -95,18 +104,11 @@ RSS_FEEDS_CONFIG = {
         "https://www.economist.com/asia/rss.xml",
         "https://www.chathamhouse.org/rss/all",
         "https://www.csis.org/rss/analysis",
-        "https://www.brookings.edu/feed/"
-    ],
-    "Economia Italia": [
-        "https://www.ilsole24ore.com/rss/news.xml",
-        "https://feeds.reuters.com/reuters/ITtopNews",
-        "https://www.corriere.it/rss/economia.xml",
-        # Extra Italian economy/business coverage
-        "https://www.repubblica.it/rss/economia/rss2.0.xml",
-        "https://www.milanofinanza.it/rss/ultimora",
-        "https://www.ansa.it/sito/ansait_rss.xml",
-        "https://www.borsaitaliana.it/borsa/notizie/listeati.rss",
-        "https://www.ilfoglio.it/rss/economia.xml"
+        "https://www.brookings.edu/feed/",
+        # Additional think-tank/strategy sources
+        "https://www.atlanticcouncil.org/feed/",
+        "https://www.rand.org/blog.feed",
+        "https://www.axios.com/feeds/feed.rss"
     ],
     "Energia e Commodities": [
         "https://www.mining.com/feed/",
@@ -117,9 +119,20 @@ RSS_FEEDS_CONFIG = {
         "https://www.spglobal.com/commodityinsights/en/rss",
         "https://www.ft.com/commodities?format=rss",
         "https://www.bloomberg.com/feed/podcast/commodities-edge",
-        "https://www.wsj.com/xml/rss/3_7014.xml"  # WSJ Commodities/Energy
+        "https://www.wsj.com/xml/rss/3_7014.xml",  # WSJ Commodities/Energy
+        # Energy data and field reports
+        "https://www.eia.gov/rss/todayinenergy.xml",
+        "https://www.rigzone.com/news/rss/rigzone_latest.aspx"
     ],
 }
+
+# === TWITTER PROFILES CONFIGURATION ===
+TWITTER_PROFILES_CONFIG = [
+    "https://twitter.com/elonmusk",
+    "https://twitter.com/paoloardoino",
+    "https://twitter.com/VitalikButerin",
+    "https://twitter.com/RayDalio"
+]
 
 # === NEWS SENTIMENT KEYWORDS ===
 SENTIMENT_KEYWORDS_CONFIG = {

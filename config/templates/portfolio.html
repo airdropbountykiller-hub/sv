@@ -86,10 +86,7 @@
         }
 
         .portfolio-sections {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-template-areas:
-                "performance performance"
-                "intraday positions";
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         }
 
         .portfolio-panel {
@@ -98,7 +95,7 @@
             border-radius: 12px;
             margin-bottom: 1.5rem;
             border-left: 4px solid #4fd1c7;
-            grid-area: performance;
+            grid-column: 1 / -1;
         }
 
         .portfolio-header {
@@ -151,9 +148,6 @@
             color: #68d391;
             margin-top: 0.2rem;
         }
-
-        .portfolio-intraday { grid-area: intraday; }
-        .portfolio-positions { grid-area: positions; }
 
         .section {
             background: #111827;
@@ -269,14 +263,6 @@
         }
 
         @media (max-width: 700px) {
-            .portfolio-sections {
-                grid-template-columns: 1fr;
-                grid-template-areas:
-                    "performance"
-                    "intraday"
-                    "positions";
-            }
-
             .position-item { grid-template-columns: 1fr; }
             .timeline-item { grid-template-columns: 1fr; }
         }
